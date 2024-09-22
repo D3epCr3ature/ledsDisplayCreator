@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QSpacerItem>
+#include <QTextEdit>
 #include <QVBoxLayout>  /* Also include {QHBox,QGrid}Layout */
 
 class MainWindow : public QMainWindow
@@ -83,6 +84,7 @@ private:
 
     QCheckBox *logsCheckBox   = nullptr;
     QPushButton *logsClearBtn = nullptr;
+    QTextEdit *logsTxtBox     = nullptr;
 
     /* Spacers */
     QSpacerItem *rowSpacers[3];

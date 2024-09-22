@@ -211,16 +211,24 @@ void MainWindow::createInteractives() {
     btns[6]->setEnabled(false);
     btns[6]->setVisible(false);
 
-    logsCheckBox = new QCheckBox(QString("Show logs"));
-    logsCheckBox->setCheckState(Qt::Unchecked);
+    logsTxtBox = new QTextEdit;
+    logsTxtBox->setEnabled(false);
+    logsTxtBox->setVisible(false);
+    logsTxtBox->clear();
 
     logsClearBtn = new QPushButton("Clear");
     logsClearBtn->setEnabled(false);    /* Enable button,
                                          * only when checkbox checked */
+    connect(logsClearBtn, &QPushButton::clicked, [=](bool checked) {
+        logsTxtBox->clear();
+    });
+
+    logsCheckBox = new QCheckBox(QString("Show logs"));
+    logsCheckBox->setCheckState(Qt::Unchecked);
     connect(logsCheckBox, &QCheckBox::stateChanged, [=](int checked) {
         logsClearBtn->setEnabled(checked);
-        btns[6]->setEnabled(checked);
-        btns[6]->setVisible(checked);
+        logsTxtBox->setEnabled(checked);
+        logsTxtBox->setVisible(checked);
     });
 
     rowSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
@@ -255,7 +263,7 @@ void MainWindow::createLayouts() {
     logsHLayout->addWidget(logsCheckBox);
     logsHLayout->addWidget(logsClearBtn);
     socketLogsVLayout->addLayout(logsHLayout);
-    socketLogsVLayout->addWidget(btns[6]);
+    socketLogsVLayout->addWidget(logsTxtBox);
     socketLogsVLayout->addStretch();
 
     /* '-> Display/Creation area + Socket & Logs ****** */
