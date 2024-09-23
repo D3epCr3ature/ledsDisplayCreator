@@ -181,15 +181,18 @@ void MainWindow::createLabels() {
     ipLabel->setBackgroundRole(QPalette::Dark);
     ipLabel->setAutoFillBackground(true);*/
     ipLabel->setGeometry(0, 0, ipLabel->sizeHint().width(), 10);
+    ipLabel->setFont({ "Source Code Pro" });
 
     portLabel = new QLabel(QString("Port          : %1").arg(port));
     portLabel->setAlignment(Qt::AlignLeft);
     portLabel->setGeometry(0, 0, portLabel->sizeHint().width(), 10);
+    portLabel->setFont({ "Source Code Pro" });
 
     socketLabel = new QLabel(QString("Socket status : %1").arg(socketStatus ?
                                                                "On" : "Off"));
     socketLabel->setAlignment(Qt::AlignLeft);
     socketLabel->setGeometry(0, 0, socketLabel->sizeHint().width(), 10);
+    socketLabel->setFont({ "Source Code Pro" });
 }
 
 void MainWindow::createInteractives() {
@@ -207,13 +210,12 @@ void MainWindow::createInteractives() {
     btns[3]->setStyleSheet("background-color: yellow");
     btns[4]->setStyleSheet("background-color: purple");
     btns[5]->setStyleSheet("background-color: cyan");
-    btns[6]->setStyleSheet("background-color: pink");
-    btns[6]->setEnabled(false);
-    btns[6]->setVisible(false);
 
     logsTxtBox = new QTextEdit;
     logsTxtBox->setEnabled(false);
     logsTxtBox->setVisible(false);
+    logsTxtBox->setReadOnly(true);  // Read-Only as it is used for logs
+    logsTxtBox->setFont({ "Source Code Pro" });
     logsTxtBox->clear();
 
     logsClearBtn = new QPushButton("Clear");
