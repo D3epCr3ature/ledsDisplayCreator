@@ -61,6 +61,7 @@ void MainWindow::startServer() {
 
     startSvrAct->setEnabled(socketStatus);
     socketStatus = true;
+    socketLabel->setText(QString("Socket status : On"));
     stopSvrAct->setEnabled(socketStatus);
 }
 
@@ -70,6 +71,7 @@ void MainWindow::stopServer() {
     /* Set true, as at start, socketStatus == false */
     startSvrAct->setEnabled(true);
     socketStatus = false;
+    socketLabel->setText(QString("Socket status : Off"));
     stopSvrAct->setEnabled(socketStatus);
 }
 
@@ -134,14 +136,14 @@ void MainWindow::createActions() {
     startSvrAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
                               tr("St&art server"), this);
     startSvrAct->setStatusTip(tr("Start server socket"));
-    startSvrAct->setEnabled(socketStatus);
+    startSvrAct->setEnabled(true);
     connect(startSvrAct, &QAction::triggered, this, &MainWindow::startServer);
 
     /* '-> Stop socket ****** */
     stopSvrAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
                              tr("St&op server"), this);
     stopSvrAct->setStatusTip(tr("Stop server socket"));
-    stopSvrAct->setEnabled(true);
+    stopSvrAct->setEnabled(false);
     connect(stopSvrAct, &QAction::triggered, this, &MainWindow::stopServer);
 
     /* '-> Customize socket's params ****** */
@@ -200,16 +202,36 @@ void MainWindow::createInteractives() {
     for (auto& btn : btns) {
         btn = new QPushButton;
         btn->setFixedSize(50, 50);
-        connect(btn, &QPushButton::clicked, this, &MainWindow::close);
     }
     btns[4]->setFixedSize(500, 500);
 
     btns[0]->setStyleSheet("background-color: red");
+    connect(btns[0], &QPushButton::clicked, this, [=](bool clikced) {
+        if (logsTxtBox->isEnabled())
+            logsTxtBox->append("BTN0: Clicked");
+    });
     btns[1]->setStyleSheet("background-color: blue");
+    connect(btns[1], &QPushButton::clicked, this, [=](bool clikced) {
+        if (logsTxtBox->isEnabled())
+            logsTxtBox->append("BTN1: Clicked");
+    });
     btns[2]->setStyleSheet("background-color: green");
+    connect(btns[2], &QPushButton::clicked, this, [=](bool clikced) {
+        if (logsTxtBox->isEnabled())
+            logsTxtBox->append("BTN2: Clicked");
+    });
     btns[3]->setStyleSheet("background-color: yellow");
+    connect(btns[3], &QPushButton::clicked, this, [=](bool clikced) {
+        if (logsTxtBox->isEnabled())
+            logsTxtBox->append("BTN3: Clicked");
+    });
     btns[4]->setStyleSheet("background-color: purple");
+    connect(btns[4], &QPushButton::clicked, this, &MainWindow::close);
     btns[5]->setStyleSheet("background-color: cyan");
+    connect(btns[5], &QPushButton::clicked, this, [=](bool clikced) {
+        if (logsTxtBox->isEnabled())
+            logsTxtBox->append("BTN5: Clicked");
+    });
 
     logsTxtBox = new QTextEdit;
     logsTxtBox->setEnabled(false);
