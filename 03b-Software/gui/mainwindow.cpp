@@ -190,89 +190,92 @@ void MainWindow::createLabels() {
     /*ipLabel->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Ignored);
     ipLabel->setBackgroundRole(QPalette::Dark);
     ipLabel->setAutoFillBackground(true);*/
-    ipLabel->setGeometry(0, 0, ipLabel->sizeHint().width(), 10);
     ipLabel->setFont({ "Source Code Pro" });
+    ipLabel->setGeometry(0, 0, ipLabel->sizeHint().width(), 10);
 
     portLabel = new QLabel(QString("Port          : %1").arg(port));
     portLabel->setAlignment(Qt::AlignLeft);
-    portLabel->setGeometry(0, 0, portLabel->sizeHint().width(), 10);
     portLabel->setFont({ "Source Code Pro" });
+    portLabel->setGeometry(0, 0, portLabel->sizeHint().width(), 10);
 
     socketLabel = new QLabel(QString("Socket status : %1").arg(
                              socketStatus ? "On" : "Off"));
     socketLabel->setAlignment(Qt::AlignLeft);
-    socketLabel->setGeometry(0, 0, socketLabel->sizeHint().width(), 10);
     socketLabel->setFont({ "Source Code Pro" });
+    socketLabel->setGeometry(0, 0, socketLabel->sizeHint().width(), 10);
 }
 void MainWindow::createDropDownMenus() {
     ledTypeDropDown      = new QComboBox;
-    ledPckgDropDown      = new QComboBox;
-    ledPckgUnitDropDown  = new QComboBox;
+    ledPkgDropDown       = new QComboBox;
+    ledPkgUnitDropDown   = new QComboBox;
     ledPlacementDropDown = new QComboBox;
 
     ledTypeDropDown->addItem("WS2812");
     ledTypeDropDown->addItem("SK6812");
     ledTypeDropDown->setFixedSize(ledTypeDropDown->sizeHint().width(),
                                   ledTypeDropDown->sizeHint().height());
-    connect(ledTypeDropDown, &QComboBox::currentIndexChanged, [=](int index) {
-        if (logsTxtBox->isEnabled())
-            logsTxtBox->append(
-                QString("Drop-down \"LED Type\": [%1] %2").arg(
-                        ledTypeDropDown->currentIndex()).arg(
-                        ledTypeDropDown->currentText())
-            );
-    });
+    connect(ledTypeDropDown, &QComboBox::currentIndexChanged,
+            [=](int index) {
+                if (logsTxtBox->isEnabled())
+                    logsTxtBox->append(
+                        QString("Drop-down \"LED Type\": [%1] %2").arg(
+                                ledTypeDropDown->currentIndex()).arg(
+                                ledTypeDropDown->currentText())
+                    );
+            } );
 
-    ledPckgDropDown->addItem("5050");
-    ledPckgDropDown->addItem("2020");
-    ledPckgDropDown->setFixedSize(ledPckgDropDown->sizeHint().width(),
-                                  ledPckgDropDown->sizeHint().height());
-    connect(ledPckgDropDown, &QComboBox::currentIndexChanged, [=](int index) {
-        if (logsTxtBox->isEnabled())
-            logsTxtBox->append(
-                QString("Drop-down \"LED Packaging\": [%1] %2").arg(
-                        ledPckgDropDown->currentIndex()).arg(
-                        ledPckgDropDown->currentText())
-            );
-    });
+    ledPkgDropDown->addItem("5050");
+    ledPkgDropDown->addItem("2020");
+    ledPkgDropDown->setFixedSize(ledPkgDropDown->sizeHint().width(),
+                                 ledPkgDropDown->sizeHint().height());
+    connect(ledPkgDropDown, &QComboBox::currentIndexChanged,
+            [=](int index) {
+                if (logsTxtBox->isEnabled())
+                    logsTxtBox->append(
+                        QString("Drop-down \"LED Packaging\": [%1] %2").arg(
+                                ledPkgDropDown->currentIndex()).arg(
+                                ledPkgDropDown->currentText())
+                    );
+            } );
 
-    ledPckgUnitDropDown->addItem("[mm]");
-    ledPckgUnitDropDown->addItem("[inch]");
-    ledPckgUnitDropDown->setFixedSize(ledPckgUnitDropDown->sizeHint().width(),
-                                      ledPckgUnitDropDown->sizeHint().height());
-    connect(ledPckgUnitDropDown, &QComboBox::currentIndexChanged,
+    ledPkgUnitDropDown->addItem("[mm]");
+    ledPkgUnitDropDown->addItem("[inch]");
+    ledPkgUnitDropDown->setFixedSize(ledPkgUnitDropDown->sizeHint().width(),
+                                     ledPkgUnitDropDown->sizeHint().height());
+    connect(ledPkgUnitDropDown, &QComboBox::currentIndexChanged,
             [=](int index) {
                 if (index == 0) {
-                    ledPckgGapLineEdit->setText(QString("%1").arg(
-                        ledPckgGapLineEdit->text().toFloat() * 25.4));
+                    ledPkgGapLineEdit->setText(QString("%1").arg(
+                        ledPkgGapLineEdit->text().toFloat() * 25.4));
                 } else {
-                    ledPckgGapLineEdit->setText(QString("%1").arg(
-                        ledPckgGapLineEdit->text().toFloat() / 25.4));
+                    ledPkgGapLineEdit->setText(QString("%1").arg(
+                        ledPkgGapLineEdit->text().toFloat() / 25.4));
                 }
 
                 if (logsTxtBox->isEnabled())
                     logsTxtBox->append(
                         QString("Drop-down \"LED Gap unit\": [%1] %2 | "
                                 "New value: %3").arg(
-                                ledPckgUnitDropDown->currentIndex()).arg(
-                                ledPckgUnitDropDown->currentText()).arg(
-                                ledPckgGapLineEdit->text())
+                                ledPkgUnitDropDown->currentIndex()).arg(
+                                ledPkgUnitDropDown->currentText()).arg(
+                                ledPkgGapLineEdit->text())
                 );
-            }
-    );
+            } );
 
     ledPlacementDropDown->addItem("Single");
     ledPlacementDropDown->addItem("Strip");
-    ledPlacementDropDown->setFixedSize(ledPlacementDropDown->sizeHint().width(),
-                                       ledPlacementDropDown->sizeHint().height());
-    connect(ledPlacementDropDown, &QComboBox::currentIndexChanged, [=](int index) {
-        if (logsTxtBox->isEnabled())
-            logsTxtBox->append(
-                QString("Drop-down \"LED Placement\": [%1] %2").arg(
-                        ledPlacementDropDown->currentIndex()).arg(
-                        ledPlacementDropDown->currentText())
-            );
-    });
+    ledPlacementDropDown->setFixedSize(
+        ledPlacementDropDown->sizeHint().width(),
+        ledPlacementDropDown->sizeHint().height());
+    connect(ledPlacementDropDown, &QComboBox::currentIndexChanged,
+            [=](int index) {
+                if (logsTxtBox->isEnabled())
+                    logsTxtBox->append(
+                        QString("Drop-down \"LED Placement\": [%1] %2").arg(
+                                ledPlacementDropDown->currentIndex()).arg(
+                                ledPlacementDropDown->currentText())
+                    );
+            } );
 }
 
 void MainWindow::createInteractives() {
@@ -281,62 +284,44 @@ void MainWindow::createInteractives() {
         btn = new QPushButton;
         btn->setFixedSize(50, 50);
     }
-    btns[4]->setFixedSize(500, 500);
 
-    btns[0]->setStyleSheet("background-color: red");
-    connect(btns[0], &QPushButton::clicked, this, [=](bool clikced) {
-        if (logsTxtBox->isEnabled())
-            logsTxtBox->append("BTN0: Clicked");
-    });
-    btns[1]->setStyleSheet("background-color: blue");
+    btns[0]->setFixedSize(500, 500);
+    btns[0]->setStyleSheet("background-color: purple");
+    connect(btns[0], &QPushButton::clicked, this, &MainWindow::close);
+
+    btns[1]->setStyleSheet("background-color: cyan");
     connect(btns[1], &QPushButton::clicked, this, [=](bool clikced) {
         if (logsTxtBox->isEnabled())
-            logsTxtBox->append("BTN1: Clicked");
-    });
-    btns[2]->setStyleSheet("background-color: green");
-    connect(btns[2], &QPushButton::clicked, this, [=](bool clikced) {
-        if (logsTxtBox->isEnabled())
-            logsTxtBox->append("BTN2: Clicked");
-    });
-    btns[3]->setStyleSheet("background-color: yellow");
-    connect(btns[3], &QPushButton::clicked, this, [=](bool clikced) {
-        if (logsTxtBox->isEnabled())
-            logsTxtBox->append("BTN3: Clicked");
-    });
-    btns[4]->setStyleSheet("background-color: purple");
-    connect(btns[4], &QPushButton::clicked, this, &MainWindow::close);
-    btns[5]->setStyleSheet("background-color: cyan");
-    connect(btns[5], &QPushButton::clicked, this, [=](bool clikced) {
-        if (logsTxtBox->isEnabled())
-            logsTxtBox->append("BTN5: Clicked");
+            logsTxtBox->append("BTN: Clicked");
     });
 
-    ledPckgGapLineEdit = new QLineEdit;
-    ledPckgGapLineEdit->setMaxLength(5);
-    ledPckgGapLineEdit->setFixedSize(50,
-                                     ledTypeDropDown->sizeHint().height());
+    ledPkgGapLineEdit = new QLineEdit;
+    ledPkgGapLineEdit->setText(QString("0"));
+    ledPkgGapLineEdit->setMaxLength(5);
+    ledPkgGapLineEdit->setFixedSize(50,
+                                    ledTypeDropDown->sizeHint().height());
 
     logsTxtBox = new QTextEdit;
     logsTxtBox->setEnabled(false);
     logsTxtBox->setVisible(false);
-    logsTxtBox->setReadOnly(true);  // Read-Only as it is used for logs
+    logsTxtBox->setReadOnly(true);  // RO as it is used for logs
     logsTxtBox->setFont({ "Source Code Pro" });
     logsTxtBox->clear();
 
     logsClearBtn = new QPushButton("Clear");
-    logsClearBtn->setEnabled(false);    /* Enable button,
-                                         * only when checkbox checked */
-    connect(logsClearBtn, &QPushButton::clicked, [=](bool checked) {
-        logsTxtBox->clear();
-    });
+    logsClearBtn->setEnabled(false);    /* Enable button, only
+                                         * when checkbox checked */
+    connect( logsClearBtn, &QPushButton::clicked,
+             [=](bool checked){ logsTxtBox->clear(); } );
 
     logsCheckBox = new QCheckBox(QString("Show logs"));
     logsCheckBox->setCheckState(Qt::Unchecked);
-    connect(logsCheckBox, &QCheckBox::stateChanged, [=](int checked) {
-        logsClearBtn->setEnabled(checked);
-        logsTxtBox->setEnabled(checked);
-        logsTxtBox->setVisible(checked);
-    });
+    connect(logsCheckBox, &QCheckBox::stateChanged,
+            [=](int checked) {
+                logsClearBtn->setEnabled(checked);
+                logsTxtBox->setEnabled(checked);
+                logsTxtBox->setVisible(checked);
+            } );
 
     rowSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                     QSizePolicy::Minimum);
@@ -357,9 +342,9 @@ void MainWindow::createLayouts() {
     /* *** Layouts filling *** */
     /* '-> Tools layouts (Drop-down menus to configure LED to put) ******* */
     toolsHLayout->addWidget(ledTypeDropDown);
-    toolsHLayout->addWidget(ledPckgDropDown);
-    toolsHLayout->addWidget(ledPckgGapLineEdit);
-    toolsHLayout->addWidget(ledPckgUnitDropDown);
+    toolsHLayout->addWidget(ledPkgDropDown);
+    toolsHLayout->addWidget(ledPkgGapLineEdit);
+    toolsHLayout->addWidget(ledPkgUnitDropDown);
     toolsHLayout->addWidget(ledPlacementDropDown);
     toolsHLayout->addItem(rowSpacers[0]);   // Compact to the right with spacer
 
@@ -367,7 +352,7 @@ void MainWindow::createLayouts() {
     socketLogsVLayout->addWidget(ipLabel);
     socketLogsVLayout->addWidget(portLabel);
     socketLogsVLayout->addWidget(socketLabel);
-    socketLogsVLayout->addWidget(btns[5]/* QMovie for animated socket status */);
+    socketLogsVLayout->addWidget(btns[1]/* QMovie for animated socket status */);
     logsHLayout->addWidget(logsCheckBox);
     logsHLayout->addWidget(logsClearBtn);
     socketLogsVLayout->addLayout(logsHLayout);
@@ -375,7 +360,7 @@ void MainWindow::createLayouts() {
     socketLogsVLayout->addStretch();
 
     /* '-> Display/Creation area + Socket & Logs ****** */
-    ledHLayout->addWidget(btns[4]);
+    ledHLayout->addWidget(btns[0]);
     ledHLayout->addLayout(socketLogsVLayout);
     ledHLayout->addItem(rowSpacers[1]);
 

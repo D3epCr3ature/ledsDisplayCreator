@@ -75,7 +75,7 @@ private:
     QHBoxLayout *logsHLayout       = nullptr;
     //QHBoxLayout *zoomHLayout     = nullptr; /* TODO: might be useless */
 
-    QPushButton *btns[7];
+    QPushButton *btns[2];
 
     /* Labels, Datas & Stuffs */
     QLabel *ipLabel = nullptr;
@@ -92,9 +92,9 @@ private:
     QTextEdit *logsTxtBox     = nullptr;
 
     QComboBox *ledTypeDropDown;
-    QComboBox *ledPckgDropDown;
-    QLineEdit *ledPckgGapLineEdit;
-    QComboBox *ledPckgUnitDropDown;
+    QComboBox *ledPkgDropDown;
+    QLineEdit *ledPkgGapLineEdit;
+    QComboBox *ledPkgUnitDropDown;
     QComboBox *ledPlacementDropDown;
 
     /* Spacers */
