@@ -1,8 +1,15 @@
 #include "mainwindow.h"
 
-#include <QMenuBar>
+#include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMenuBar>
 #include <QPushButton>
+#include <QSpacerItem>
+#include <QTextEdit>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     createActions();
@@ -126,7 +133,7 @@ void MainWindow::createActions() {
 
     /*    '-> Lifesized dims of design ****** */
     infoSizeIrlAct = new QAction(QIcon::fromTheme(
-                                     QIcon::ThemeIcon::DocumentNew),
+                                    QIcon::ThemeIcon::DocumentNew),
                                  tr("Real life size of design"), this);
     infoSizeIrlAct->setStatusTip(tr("Get lifesized dimensions of design"));
     connect(infoSizeIrlAct, &QAction::triggered,
@@ -191,8 +198,8 @@ void MainWindow::createLabels() {
     portLabel->setGeometry(0, 0, portLabel->sizeHint().width(), 10);
     portLabel->setFont({ "Source Code Pro" });
 
-    socketLabel = new QLabel(QString("Socket status : %1").arg(socketStatus ?
-                                                               "On" : "Off"));
+    socketLabel = new QLabel(QString("Socket status : %1").arg(
+                             socketStatus ? "On" : "Off"));
     socketLabel->setAlignment(Qt::AlignLeft);
     socketLabel->setGeometry(0, 0, socketLabel->sizeHint().width(), 10);
     socketLabel->setFont({ "Source Code Pro" });
@@ -200,6 +207,7 @@ void MainWindow::createLabels() {
 void MainWindow::createDropDownMenus() {
     ledTypeDropDown      = new QComboBox;
     ledPckgDropDown      = new QComboBox;
+    ledPckgUnitDropDown  = new QComboBox;
     ledPlacementDropDown = new QComboBox;
 
     ledTypeDropDown->addItem("WS2812");
@@ -209,9 +217,9 @@ void MainWindow::createDropDownMenus() {
     connect(ledTypeDropDown, &QComboBox::currentIndexChanged, [=](int index) {
         if (logsTxtBox->isEnabled())
             logsTxtBox->append(
-                QString("Drop-down \"LED Type\": %1 (%2)").arg(
-                        ledTypeDropDown->currentText()).arg(
-                        ledTypeDropDown->currentIndex())
+                QString("Drop-down \"LED Type\": [%1] %2").arg(
+                        ledTypeDropDown->currentIndex()).arg(
+                        ledTypeDropDown->currentText())
             );
     });
 
@@ -222,11 +230,36 @@ void MainWindow::createDropDownMenus() {
     connect(ledPckgDropDown, &QComboBox::currentIndexChanged, [=](int index) {
         if (logsTxtBox->isEnabled())
             logsTxtBox->append(
-                QString("Drop-down \"LED Packaging\": %1 (%2)").arg(
-                        ledPckgDropDown->currentText()).arg(
-                        ledPckgDropDown->currentIndex())
+                QString("Drop-down \"LED Packaging\": [%1] %2").arg(
+                        ledPckgDropDown->currentIndex()).arg(
+                        ledPckgDropDown->currentText())
             );
     });
+
+    ledPckgUnitDropDown->addItem("[mm]");
+    ledPckgUnitDropDown->addItem("[inch]");
+    ledPckgUnitDropDown->setFixedSize(ledPckgUnitDropDown->sizeHint().width(),
+                                      ledPckgUnitDropDown->sizeHint().height());
+    connect(ledPckgUnitDropDown, &QComboBox::currentIndexChanged,
+            [=](int index) {
+                if (index == 0) {
+                    ledPckgGapLineEdit->setText(QString("%1").arg(
+                        ledPckgGapLineEdit->text().toFloat() * 25.4));
+                } else {
+                    ledPckgGapLineEdit->setText(QString("%1").arg(
+                        ledPckgGapLineEdit->text().toFloat() / 25.4));
+                }
+
+                if (logsTxtBox->isEnabled())
+                    logsTxtBox->append(
+                        QString("Drop-down \"LED Gap unit\": [%1] %2 | "
+                                "New value: %3").arg(
+                                ledPckgUnitDropDown->currentIndex()).arg(
+                                ledPckgUnitDropDown->currentText()).arg(
+                                ledPckgGapLineEdit->text())
+                );
+            }
+    );
 
     ledPlacementDropDown->addItem("Single");
     ledPlacementDropDown->addItem("Strip");
@@ -235,14 +268,15 @@ void MainWindow::createDropDownMenus() {
     connect(ledPlacementDropDown, &QComboBox::currentIndexChanged, [=](int index) {
         if (logsTxtBox->isEnabled())
             logsTxtBox->append(
-                QString("Drop-down \"LED Placement\": %1 (%2)").arg(
-                        ledPlacementDropDown->currentText()).arg(
-                        ledPlacementDropDown->currentIndex())
+                QString("Drop-down \"LED Placement\": [%1] %2").arg(
+                        ledPlacementDropDown->currentIndex()).arg(
+                        ledPlacementDropDown->currentText())
             );
     });
 }
 
 void MainWindow::createInteractives() {
+
     for (auto& btn : btns) {
         btn = new QPushButton;
         btn->setFixedSize(50, 50);
@@ -276,6 +310,11 @@ void MainWindow::createInteractives() {
         if (logsTxtBox->isEnabled())
             logsTxtBox->append("BTN5: Clicked");
     });
+
+    ledPckgGapLineEdit = new QLineEdit;
+    ledPckgGapLineEdit->setMaxLength(5);
+    ledPckgGapLineEdit->setFixedSize(50,
+                                     ledTypeDropDown->sizeHint().height());
 
     logsTxtBox = new QTextEdit;
     logsTxtBox->setEnabled(false);
@@ -319,7 +358,8 @@ void MainWindow::createLayouts() {
     /* '-> Tools layouts (Drop-down menus to configure LED to put) ******* */
     toolsHLayout->addWidget(ledTypeDropDown);
     toolsHLayout->addWidget(ledPckgDropDown);
-    toolsHLayout->addWidget(btns[2]/* TextBox   "Gap"  */);
+    toolsHLayout->addWidget(ledPckgGapLineEdit);
+    toolsHLayout->addWidget(ledPckgUnitDropDown);
     toolsHLayout->addWidget(ledPlacementDropDown);
     toolsHLayout->addItem(rowSpacers[0]);   // Compact to the right with spacer
 

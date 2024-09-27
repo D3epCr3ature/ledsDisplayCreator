@@ -2,13 +2,16 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QLabel>
+#include <QLineEdit>
+#include <QMenuBar>
 #include <QPushButton>
 #include <QSpacerItem>
 #include <QTextEdit>
-#include <QVBoxLayout>  /* Also include {QHBox,QGrid}Layout */
 
 class MainWindow : public QMainWindow
 {
@@ -90,6 +93,8 @@ private:
 
     QComboBox *ledTypeDropDown;
     QComboBox *ledPckgDropDown;
+    QLineEdit *ledPckgGapLineEdit;
+    QComboBox *ledPckgUnitDropDown;
     QComboBox *ledPlacementDropDown;
 
     /* Spacers */
