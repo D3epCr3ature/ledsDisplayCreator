@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QSpacerItem>
@@ -38,6 +39,7 @@ private:
     void createActions();
     void createMenus();
     void createLabels();
+    void createDropDownMenus();
     void createInteractives();
     void createLayouts();
 
@@ -85,6 +87,10 @@ private:
     QCheckBox *logsCheckBox   = nullptr;
     QPushButton *logsClearBtn = nullptr;
     QTextEdit *logsTxtBox     = nullptr;
+
+    QComboBox *ledTypeDropDown;
+    QComboBox *ledPckgDropDown;
+    QComboBox *ledPlacementDropDown;
 
     /* Spacers */
     QSpacerItem *rowSpacers[3];

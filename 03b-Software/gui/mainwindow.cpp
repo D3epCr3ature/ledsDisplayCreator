@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     createMenus();
 
     createLabels();
+    createDropDownMenus();
     createInteractives();
     createLayouts();
 
@@ -196,9 +197,52 @@ void MainWindow::createLabels() {
     socketLabel->setGeometry(0, 0, socketLabel->sizeHint().width(), 10);
     socketLabel->setFont({ "Source Code Pro" });
 }
+void MainWindow::createDropDownMenus() {
+    ledTypeDropDown      = new QComboBox;
+    ledPckgDropDown      = new QComboBox;
+    ledPlacementDropDown = new QComboBox;
+
+    ledTypeDropDown->addItem("WS2812");
+    ledTypeDropDown->addItem("SK6812");
+    ledTypeDropDown->setFixedSize(ledTypeDropDown->sizeHint().width(),
+                                  ledTypeDropDown->sizeHint().height());
+    connect(ledTypeDropDown, &QComboBox::currentIndexChanged, [=](int index) {
+        if (logsTxtBox->isEnabled())
+            logsTxtBox->append(
+                QString("Drop-down \"LED Type\": %1 (%2)").arg(
+                        ledTypeDropDown->currentText()).arg(
+                        ledTypeDropDown->currentIndex())
+            );
+    });
+
+    ledPckgDropDown->addItem("5050");
+    ledPckgDropDown->addItem("2020");
+    ledPckgDropDown->setFixedSize(ledPckgDropDown->sizeHint().width(),
+                                  ledPckgDropDown->sizeHint().height());
+    connect(ledPckgDropDown, &QComboBox::currentIndexChanged, [=](int index) {
+        if (logsTxtBox->isEnabled())
+            logsTxtBox->append(
+                QString("Drop-down \"LED Packaging\": %1 (%2)").arg(
+                        ledPckgDropDown->currentText()).arg(
+                        ledPckgDropDown->currentIndex())
+            );
+    });
+
+    ledPlacementDropDown->addItem("Single");
+    ledPlacementDropDown->addItem("Strip");
+    ledPlacementDropDown->setFixedSize(ledPlacementDropDown->sizeHint().width(),
+                                       ledPlacementDropDown->sizeHint().height());
+    connect(ledPlacementDropDown, &QComboBox::currentIndexChanged, [=](int index) {
+        if (logsTxtBox->isEnabled())
+            logsTxtBox->append(
+                QString("Drop-down \"LED Placement\": %1 (%2)").arg(
+                        ledPlacementDropDown->currentText()).arg(
+                        ledPlacementDropDown->currentIndex())
+            );
+    });
+}
 
 void MainWindow::createInteractives() {
-
     for (auto& btn : btns) {
         btn = new QPushButton;
         btn->setFixedSize(50, 50);
@@ -273,10 +317,10 @@ void MainWindow::createLayouts() {
 
     /* *** Layouts filling *** */
     /* '-> Tools layouts (Drop-down menus to configure LED to put) ******* */
-    toolsHLayout->addWidget(btns[0]/* Drop-down "Type" */);
-    toolsHLayout->addWidget(btns[1]/* Drop-down "Size" */);
+    toolsHLayout->addWidget(ledTypeDropDown);
+    toolsHLayout->addWidget(ledPckgDropDown);
     toolsHLayout->addWidget(btns[2]/* TextBox   "Gap"  */);
-    toolsHLayout->addWidget(btns[3]/* Drop-down "Single/Strip" */);
+    toolsHLayout->addWidget(ledPlacementDropDown);
     toolsHLayout->addItem(rowSpacers[0]);   // Compact to the right with spacer
 
     /* '-> Socket infos + Logs ****** */
