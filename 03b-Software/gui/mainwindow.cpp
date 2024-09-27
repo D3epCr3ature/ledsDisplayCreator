@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QMenuBar>
 #include <QPushButton>
+#include <QSlider>
 #include <QSpacerItem>
 #include <QTextEdit>
 
@@ -185,13 +186,15 @@ void MainWindow::createMenus() {
 }
 
 void MainWindow::createLabels() {
-    ipLabel = new QLabel("IP            : " + ipStr);
+    /* Hardcoded IP for sizeHint.width() to be to the longest possible value */
+    ipLabel = new QLabel("IP            : 255.255.255.255");
     ipLabel->setAlignment(Qt::AlignLeft);
     /*ipLabel->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Ignored);
     ipLabel->setBackgroundRole(QPalette::Dark);
     ipLabel->setAutoFillBackground(true);*/
     ipLabel->setFont({ "Source Code Pro" });
     ipLabel->setGeometry(0, 0, ipLabel->sizeHint().width(), 10);
+    ipLabel->setText(QString("IP            : %1").arg(ipStr));
 
     portLabel = new QLabel(QString("Port          : %1").arg(port));
     portLabel->setAlignment(Qt::AlignLeft);
@@ -323,6 +326,9 @@ void MainWindow::createInteractives() {
                 logsTxtBox->setVisible(checked);
             } );
 
+    zoomSlider = new QSlider;
+    zoomSlider->setOrientation(Qt::Orientation::Horizontal);
+
     rowSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                     QSizePolicy::Minimum);
     rowSpacers[1] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
@@ -367,6 +373,6 @@ void MainWindow::createLayouts() {
     /* '-> Main Layout ****** */
     mainVLayout->addLayout(toolsHLayout, Qt::AlignmentFlag::AlignRight);
     mainVLayout->addLayout(ledHLayout);
-    //mainVLayout->addWidget(/* Fill with zoom bar * /);
+    mainVLayout->addWidget(zoomSlider);
     mainVLayout->addStretch();
 }

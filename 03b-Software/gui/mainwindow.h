@@ -10,6 +10,7 @@
 #include <QLineEdit>
 #include <QMenuBar>
 #include <QPushButton>
+#include <QSlider>
 #include <QSpacerItem>
 #include <QTextEdit>
 
@@ -75,6 +76,18 @@ private:
     QHBoxLayout *logsHLayout       = nullptr;
     //QHBoxLayout *zoomHLayout     = nullptr; /* TODO: might be useless */
 
+    /* Interactives */
+    QCheckBox   *logsCheckBox = nullptr;
+    QPushButton *logsClearBtn = nullptr;
+
+    QComboBox *ledTypeDropDown      = nullptr;
+    QComboBox *ledPkgDropDown       = nullptr;
+    QLineEdit *ledPkgGapLineEdit    = nullptr;
+    QComboBox *ledPkgUnitDropDown   = nullptr;
+    QComboBox *ledPlacementDropDown = nullptr;
+
+    QSlider *zoomSlider;
+
     QPushButton *btns[2];
 
     /* Labels, Datas & Stuffs */
@@ -87,15 +100,7 @@ private:
     QLabel *socketLabel  = nullptr;
     bool    socketStatus = false;
 
-    QCheckBox *logsCheckBox   = nullptr;
-    QPushButton *logsClearBtn = nullptr;
-    QTextEdit *logsTxtBox     = nullptr;
-
-    QComboBox *ledTypeDropDown;
-    QComboBox *ledPkgDropDown;
-    QLineEdit *ledPkgGapLineEdit;
-    QComboBox *ledPkgUnitDropDown;
-    QComboBox *ledPlacementDropDown;
+    QTextEdit   *logsTxtBox   = nullptr;
 
     /* Spacers */
     QSpacerItem *rowSpacers[3];
