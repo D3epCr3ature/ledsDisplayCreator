@@ -206,6 +206,24 @@ void MainWindow::createLabels() {
     socketLabel->setAlignment(Qt::AlignLeft);
     socketLabel->setFont({ "Source Code Pro" });
     socketLabel->setGeometry(0, 0, socketLabel->sizeHint().width(), 10);
+
+    zoomPlusLabel = new QPushButton("+");
+    zoomPlusLabel->setFont({ "Source Code Pro" });
+    zoomPlusLabel->setFixedSize(20, 20);
+    connect(zoomPlusLabel, &QPushButton::clicked,
+            [=](bool clicked) {
+                zoomSlider->setValue(zoomSlider->value() +
+                                     zoomSlider->tickInterval());
+            } );
+
+    zoomMinusLabel = new QPushButton("-");
+    zoomMinusLabel->setFont({ "Source Code Pro" });
+    zoomMinusLabel->setFixedSize(20, 20);
+    connect(zoomMinusLabel, &QPushButton::clicked,
+            [=](bool clicked) {
+                zoomSlider->setValue(zoomSlider->value() -
+                                     zoomSlider->tickInterval());
+            } );
 }
 void MainWindow::createDropDownMenus() {
     ledTypeDropDown      = new QComboBox;
@@ -327,11 +345,18 @@ void MainWindow::createInteractives() {
             } );
 
     zoomSlider = new QSlider;
+    zoomSlider->setTickInterval(10);
+    zoomSlider->setMinimum(0);
+    zoomSlider->setMaximum(200);
+    zoomSlider->setValue(100);
     zoomSlider->setOrientation(Qt::Orientation::Horizontal);
+    zoomSlider->setFixedSize(btns[0]->size().width()/2, 50);
 
     rowSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                     QSizePolicy::Minimum);
     rowSpacers[1] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
+                                    QSizePolicy::Minimum);
+    rowSpacers[2] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                     QSizePolicy::Minimum);
 }
 
@@ -342,8 +367,8 @@ void MainWindow::createLayouts() {
     socketLogsVLayout = new QVBoxLayout;
     logsHLayout       = new QHBoxLayout;
     ledHLayout        = new QHBoxLayout;
+    zoomHLayout       = new QHBoxLayout;
     mainVLayout       = new QVBoxLayout;
-    //zoomHLayout     = new QHBoxLayout;
 
     /* *** Layouts filling *** */
     /* '-> Tools layouts (Drop-down menus to configure LED to put) ******* */
@@ -368,11 +393,17 @@ void MainWindow::createLayouts() {
     /* '-> Display/Creation area + Socket & Logs ****** */
     ledHLayout->addWidget(btns[0]);
     ledHLayout->addLayout(socketLogsVLayout);
-    ledHLayout->addItem(rowSpacers[1]);
+    ledHLayout->addItem(rowSpacers[1]);     // Compact to the right with spacer
+
+    /* '-> Zoom layout with Slider & Clickable Labels */
+    zoomHLayout->addWidget(zoomMinusLabel);
+    zoomHLayout->addWidget(zoomSlider);
+    zoomHLayout->addWidget(zoomPlusLabel);
+    zoomHLayout->addItem(rowSpacers[2]);    // Compact to the right with spacer
 
     /* '-> Main Layout ****** */
-    mainVLayout->addLayout(toolsHLayout, Qt::AlignmentFlag::AlignRight);
+    mainVLayout->addLayout(toolsHLayout);
     mainVLayout->addLayout(ledHLayout);
-    mainVLayout->addWidget(zoomSlider);
+    mainVLayout->addLayout(zoomHLayout);
     mainVLayout->addStretch();
 }
