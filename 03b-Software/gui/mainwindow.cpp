@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenuBar>
+#include <QMovie>
 #include <QPushButton>
 #include <QSlider>
 #include <QSpacerItem>
@@ -302,19 +303,10 @@ void MainWindow::createDropDownMenus() {
 
 void MainWindow::createInteractives() {
 
-    for (auto& btn : btns)
-        btn = new QPushButton;
-
-    btns[0]->setFixedSize(500, 500);
-    btns[0]->setStyleSheet("background-color: purple");
-    connect(btns[0], &QPushButton::clicked, this, &MainWindow::close);
-
-    btns[1]->setFixedSize(50, 50);
-    btns[1]->setStyleSheet("background-color: cyan");
-    connect(btns[1], &QPushButton::clicked, this, [=](bool clikced) {
-        if (logsTxtBox->isEnabled())
-            logsTxtBox->append("BTN: Clicked");
-    });
+    btn = new QPushButton;
+    btn->setFixedSize(500, 500);
+    btn->setStyleSheet("background-color: purple");
+    connect(btn, &QPushButton::clicked, this, &MainWindow::close);
 
     ledPkgGapLineEdit = new QLineEdit;
     ledPkgGapLineEdit->setText(QString("0"));
@@ -352,7 +344,21 @@ void MainWindow::createInteractives() {
     zoomSlider->setMaximum(200);
     zoomSlider->setValue(100);
     zoomSlider->setOrientation(Qt::Orientation::Horizontal);
-    zoomSlider->setFixedSize(btns[0]->size().width()/2, 50);
+    zoomSlider->setFixedSize(btn->size().width()/2, 50);
+
+    socketMovieLabel = new QLabel;
+    socketMovieLabel->setFixedSize(125, 125);
+    socketMovieLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    socketMovieLabel->setBackgroundRole(QPalette::Dark);
+    socketMovieLabel->setAutoFillBackground(false);
+    socketMovie = new QMovie(this);
+    socketMovie->setCacheMode(QMovie::CacheAll);
+    socketMovie->stop();
+    socketMovieLabel->setMovie(socketMovie);
+    socketMovie->setFileName("../../assets/loading_wo_bg.gif");
+    socketMovie->setScaledSize({ socketMovieLabel->size().width(),
+                               socketMovieLabel->size().height() });
+    socketMovie->start();
 
     rightJustifSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                             QSizePolicy::Minimum);
@@ -363,6 +369,10 @@ void MainWindow::createInteractives() {
     logsAlignmentSpacer   = new QSpacerItem(ipLabel->size().width()        -
                                               logsCheckBox->size().width() -
                                               logsClearBtn->size().width(), 0,
+                                            QSizePolicy::Minimum,
+                                            QSizePolicy::Minimum);
+    socketMovieSpacer     = new QSpacerItem(0,
+                                            socketMovieLabel->size().height(),
                                             QSizePolicy::Minimum,
                                             QSizePolicy::Minimum);
 }
@@ -390,7 +400,8 @@ void MainWindow::createLayouts() {
     socketLogsVLayout->addWidget(ipLabel);
     socketLogsVLayout->addWidget(portLabel);
     socketLogsVLayout->addWidget(socketLabel);
-    socketLogsVLayout->addWidget(btns[1], 0, Qt::AlignmentFlag::AlignCenter);
+    socketLogsVLayout->addWidget(socketMovieLabel, 0, Qt::AlignmentFlag::AlignCenter);
+    socketLogsVLayout->addSpacerItem(socketMovieSpacer);
     logsHLayout->addWidget(logsCheckBox);
     logsHLayout->addItem(logsAlignmentSpacer);
     logsHLayout->addWidget(logsClearBtn);
@@ -399,7 +410,7 @@ void MainWindow::createLayouts() {
     socketLogsVLayout->addStretch();
 
     /* '-> Display/Creation area + Socket & Logs ****** */
-    ledHLayout->addWidget(btns[0]/* Drawing area */);
+    ledHLayout->addWidget(btn/* Drawing area */);
     ledHLayout->addLayout(socketLogsVLayout);
     ledHLayout->addItem(rightJustifSpacers[1]);
 
