@@ -24,11 +24,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QWidget *widget = new QWidget();
     widget->setLayout(mainVLayout);
     setCentralWidget(widget);
-    /*setLayout(mainVLayout);   /* Investigate to understand why this
-                                 * is not working */
+    /*setLayout(mainVLayout);   /* TODO: Investigate to understand why
+                                 *       this is not working */
 
     setWindowTitle("LEDs Display Creator");
-    setMinimumSize(300, 300);
+    setMinimumSize(mainVLayout->geometry().size().width(),
+                   mainVLayout->geometry().size().height());
     resize(480, 320);
 }
 
@@ -194,15 +195,15 @@ void MainWindow::createLabels() {
     ipLabel->setAutoFillBackground(true);*/
     ipLabel->setFont({ "Source Code Pro" });
     ipLabel->setGeometry(0, 0, ipLabel->sizeHint().width(), 10);
-    ipLabel->setText(QString("IP            : %1").arg(ipStr));
+    ipLabel->setText(QString("IP            : %1").arg(ipStr, 15));
 
-    portLabel = new QLabel(QString("Port          : %1").arg(port));
+    portLabel = new QLabel(QString("Port          : %1").arg(port, 15));
     portLabel->setAlignment(Qt::AlignLeft);
     portLabel->setFont({ "Source Code Pro" });
     portLabel->setGeometry(0, 0, portLabel->sizeHint().width(), 10);
 
     socketLabel = new QLabel(QString("Socket status : %1").arg(
-                             socketStatus ? "On" : "Off"));
+                             socketStatus ? "On" : "Off", 15));
     socketLabel->setAlignment(Qt::AlignLeft);
     socketLabel->setFont({ "Source Code Pro" });
     socketLabel->setGeometry(0, 0, socketLabel->sizeHint().width(), 10);
@@ -301,15 +302,14 @@ void MainWindow::createDropDownMenus() {
 
 void MainWindow::createInteractives() {
 
-    for (auto& btn : btns) {
+    for (auto& btn : btns)
         btn = new QPushButton;
-        btn->setFixedSize(50, 50);
-    }
 
     btns[0]->setFixedSize(500, 500);
     btns[0]->setStyleSheet("background-color: purple");
     connect(btns[0], &QPushButton::clicked, this, &MainWindow::close);
 
+    btns[1]->setFixedSize(50, 50);
     btns[1]->setStyleSheet("background-color: cyan");
     connect(btns[1], &QPushButton::clicked, this, [=](bool clikced) {
         if (logsTxtBox->isEnabled())
@@ -327,9 +327,11 @@ void MainWindow::createInteractives() {
     logsTxtBox->setVisible(false);
     logsTxtBox->setReadOnly(true);  // RO as it is used for logs
     logsTxtBox->setFont({ "Source Code Pro" });
+    logsTxtBox->setFixedWidth(ipLabel->size().width());
     logsTxtBox->clear();
 
     logsClearBtn = new QPushButton("Clear");
+    logsClearBtn->setFixedWidth(100);
     logsClearBtn->setEnabled(false);    /* Enable button, only
                                          * when checkbox checked */
     connect( logsClearBtn, &QPushButton::clicked,
@@ -352,12 +354,17 @@ void MainWindow::createInteractives() {
     zoomSlider->setOrientation(Qt::Orientation::Horizontal);
     zoomSlider->setFixedSize(btns[0]->size().width()/2, 50);
 
-    rowSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
-                                    QSizePolicy::Minimum);
-    rowSpacers[1] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
-                                    QSizePolicy::Minimum);
-    rowSpacers[2] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
-                                    QSizePolicy::Minimum);
+    rightJustifSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
+                                            QSizePolicy::Minimum);
+    rightJustifSpacers[1] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
+                                          QSizePolicy::Minimum);
+    rightJustifSpacers[2] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
+                                            QSizePolicy::Minimum);
+    logsAlignmentSpacer   = new QSpacerItem(ipLabel->size().width()        -
+                                              logsCheckBox->size().width() -
+                                              logsClearBtn->size().width(), 0,
+                                            QSizePolicy::Minimum,
+                                            QSizePolicy::Minimum);
 }
 
 void MainWindow::createLayouts() {
@@ -377,29 +384,30 @@ void MainWindow::createLayouts() {
     toolsHLayout->addWidget(ledPkgGapLineEdit);
     toolsHLayout->addWidget(ledPkgUnitDropDown);
     toolsHLayout->addWidget(ledPlacementDropDown);
-    toolsHLayout->addItem(rowSpacers[0]);   // Compact to the right with spacer
+    toolsHLayout->addItem(rightJustifSpacers[0]);
 
     /* '-> Socket infos + Logs ****** */
     socketLogsVLayout->addWidget(ipLabel);
     socketLogsVLayout->addWidget(portLabel);
     socketLogsVLayout->addWidget(socketLabel);
-    socketLogsVLayout->addWidget(btns[1]/* QMovie for animated socket status */);
+    socketLogsVLayout->addWidget(btns[1], 0, Qt::AlignmentFlag::AlignCenter);
     logsHLayout->addWidget(logsCheckBox);
+    logsHLayout->addItem(logsAlignmentSpacer);
     logsHLayout->addWidget(logsClearBtn);
     socketLogsVLayout->addLayout(logsHLayout);
     socketLogsVLayout->addWidget(logsTxtBox);
     socketLogsVLayout->addStretch();
 
     /* '-> Display/Creation area + Socket & Logs ****** */
-    ledHLayout->addWidget(btns[0]);
+    ledHLayout->addWidget(btns[0]/* Drawing area */);
     ledHLayout->addLayout(socketLogsVLayout);
-    ledHLayout->addItem(rowSpacers[1]);     // Compact to the right with spacer
+    ledHLayout->addItem(rightJustifSpacers[1]);
 
     /* '-> Zoom layout with Slider & Clickable Labels */
     zoomHLayout->addWidget(zoomMinusLabel);
     zoomHLayout->addWidget(zoomSlider);
     zoomHLayout->addWidget(zoomPlusLabel);
-    zoomHLayout->addItem(rowSpacers[2]);    // Compact to the right with spacer
+    zoomHLayout->addItem(rightJustifSpacers[2]);
 
     /* '-> Main Layout ****** */
     mainVLayout->addLayout(toolsHLayout);
