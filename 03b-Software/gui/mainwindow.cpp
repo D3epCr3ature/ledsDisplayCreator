@@ -69,20 +69,22 @@ void MainWindow::cfgSocketInfos() {
 
 void MainWindow::startServer() {
     /* TODO */
+    updateSocketMovie("../../assets/someKindOfPortal.gif");
 
     startSvrAct->setEnabled(socketStatus);
     socketStatus = true;
-    socketLabel->setText(QString("Socket status : On"));
+    socketLabel->setText(QString("Socket status : %1").arg("On", 15));
     stopSvrAct->setEnabled(socketStatus);
 }
 
 void MainWindow::stopServer() {
     /* TODO */
+    updateSocketMovie("../../assets/loading_wo_bg.gif");
 
     /* Set true, as at start, socketStatus == false */
     startSvrAct->setEnabled(true);
     socketStatus = false;
-    socketLabel->setText(QString("Socket status : Off"));
+    socketLabel->setText(QString("Socket status : %1").arg("Off", 15));
     stopSvrAct->setEnabled(socketStatus);
 }
 
@@ -347,18 +349,14 @@ void MainWindow::createInteractives() {
     zoomSlider->setFixedSize(btn->size().width()/2, 50);
 
     socketMovieLabel = new QLabel;
-    socketMovieLabel->setFixedSize(125, 125);
+    socketMovieLabel->setAlignment(Qt::AlignCenter);
+    socketMovieLabel->setFixedSize(ipLabel->size().width(), 125);
     socketMovieLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    socketMovieLabel->setBackgroundRole(QPalette::Dark);
     socketMovieLabel->setAutoFillBackground(false);
-    socketMovie = new QMovie(this);
+    socketMovie = new QMovie;
     socketMovie->setCacheMode(QMovie::CacheAll);
-    socketMovie->stop();
     socketMovieLabel->setMovie(socketMovie);
-    socketMovie->setFileName("../../assets/loading_wo_bg.gif");
-    socketMovie->setScaledSize({ socketMovieLabel->size().width(),
-                               socketMovieLabel->size().height() });
-    socketMovie->start();
+    updateSocketMovie("../../assets/loading_wo_bg.gif");
 
     rightJustifSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                             QSizePolicy::Minimum);
@@ -425,4 +423,31 @@ void MainWindow::createLayouts() {
     mainVLayout->addLayout(ledHLayout);
     mainVLayout->addLayout(zoomHLayout);
     mainVLayout->addStretch();
+}
+
+void MainWindow::updateSocketMovie(QString filename) {
+    static int lblW = socketMovieLabel->size().width(),
+               lblH = socketMovieLabel->size().height();
+    static int movieW = 0, movieH = 0;
+
+    /* Stop to change filename */
+    socketMovie->stop();
+    socketMovie->setFileName(filename);
+
+    /* Jump to 1st frame to get its dimension */
+    socketMovie->jumpToFrame(0);
+    movieW = socketMovie->currentImage().size().width();
+    movieH = socketMovie->currentImage().size().height();
+
+    if (movieW <= movieH) {
+        socketMovie->setScaledSize({ movieW * lblH / movieH, lblH });
+    } else {
+        socketMovie->setScaledSize({ lblW, lblW * movieH / movieW });
+    }
+
+    socketMovie->start();
+}
+
+void MainWindow::updateSocketMovie(const char *filename) {
+    updateSocketMovie(QString(filename));
 }
