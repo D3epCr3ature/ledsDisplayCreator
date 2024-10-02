@@ -47,6 +47,8 @@ private:
     void createDropDownMenus();
     void createInteractives();
     void createLayouts();
+    void updateSocketMovie(QString filename);
+    void updateSocketMovie(const char *filename);
 
     /* Menus */
     QMenu *fileMenu = nullptr;
