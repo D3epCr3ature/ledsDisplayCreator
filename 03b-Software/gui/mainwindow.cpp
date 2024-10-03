@@ -14,12 +14,7 @@
 #include <QTextEdit>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    createActions();
     createMenus();
-
-    createLabels();
-    createDropDownMenus();
-    createInteractives();
     createLayouts();
 
     QWidget *widget = new QWidget();
@@ -70,43 +65,43 @@ void MainWindow::cfgSocketInfos() {
 void MainWindow::startServer() {
     /* TODO */
 
-    startSvrAct->setEnabled(socketStatus);
-    socketStatus = true;
-    socketLabel->setText(QString("Socket status : %1").arg("On", 15));
-    stopSvrAct->setEnabled(socketStatus);
+    startSvrAct->setEnabled(false);
+    scktStatus = true;
+    scktLbl->setText(QString("Socket status : %1").arg("On", 15));
+    stopSvrAct->setEnabled( ! startSvrAct->isEnabled() );
 
-    replaceSocketMovieWith(socketStatusMovieOn);
+    replaceSocketMovieWith(scktMovConnect);
 }
 
 void MainWindow::stopServer() {
     /* TODO */
 
-    /* Set true, at start, socketStatus == false */
+    /* Set true because, at start, socketStatus == false */
     startSvrAct->setEnabled(true);
-    socketStatus = false;
-    socketLabel->setText(QString("Socket status : %1").arg("Off", 15));
-    stopSvrAct->setEnabled(socketStatus);
+    scktStatus = false;
+    scktLbl->setText(QString("Socket status : %1").arg("Off", 15));
+    stopSvrAct->setEnabled( ! startSvrAct->isEnabled() );
 
-    replaceSocketMovieWith(socketStatusMovieOff);
+    replaceSocketMovieWith(scktMovDisconn);
 }
 
 void MainWindow::createActions() {
     /* File actions *************************************************** */
-    /* '-> Save ****** */
+    /** Save ****** */
     saveAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
                           tr("&Save design"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save current design"));
     connect(saveAct, &QAction::triggered, this, &MainWindow::saveDesign);
 
-    /* '-> Load ****** */
+    /** Load ****** */
     loadAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
                           tr("&Load design"), this);
     loadAct->setShortcuts(QKeySequence::Open);
     loadAct->setStatusTip(tr("Load existing design"));
     connect(loadAct, &QAction::triggered, this, &MainWindow::loadDesign);
 
-    /* '-> Quit ****** */
+    /** Quit ****** */
     exitAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
                           tr("&Quit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
@@ -129,8 +124,8 @@ void MainWindow::createActions() {
     connect(emptyDesignAct, &QAction::triggered,
             this, &MainWindow::emptyDesign);
 
-    /* '-> Infos ****** */
-    /*    '-> Number of LEDs ****** */
+    /** Infos ****** */
+    /*** Number of LEDs ****** */
     infoLedCountAct = new QAction(QIcon::fromTheme(
                                       QIcon::ThemeIcon::DocumentNew),
                                   tr("# of LEDs"), this);
@@ -138,7 +133,7 @@ void MainWindow::createActions() {
     connect(infoLedCountAct, &QAction::triggered,
             this, &MainWindow::infoLedsCount);
 
-    /*    '-> Lifesized dims of design ****** */
+    /*** Lifesized dims of design ****** */
     infoSizeIrlAct = new QAction(QIcon::fromTheme(
                                     QIcon::ThemeIcon::DocumentNew),
                                  tr("Real life size of design"), this);
@@ -147,21 +142,21 @@ void MainWindow::createActions() {
             this, &MainWindow::infoSizeIrl);
 
     /* TCP Socket actions ********************************************* */
-    /* '-> Start socket ****** */
+    /** Start socket ****** */
     startSvrAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
                               tr("St&art server"), this);
     startSvrAct->setStatusTip(tr("Start server socket"));
     startSvrAct->setEnabled(true);
     connect(startSvrAct, &QAction::triggered, this, &MainWindow::startServer);
 
-    /* '-> Stop socket ****** */
+    /** Stop socket ****** */
     stopSvrAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
                              tr("St&op server"), this);
     stopSvrAct->setStatusTip(tr("Stop server socket"));
     stopSvrAct->setEnabled(false);
     connect(stopSvrAct, &QAction::triggered, this, &MainWindow::stopServer);
 
-    /* '-> Customize socket's params ****** */
+    /** Customize socket's params ****** */
     cfgSocketAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
                                tr("&Configure socket"), this);
     cfgSocketAct->setStatusTip(tr("Configure socket's IP & Port"));
@@ -170,6 +165,9 @@ void MainWindow::createActions() {
 }
 
 void MainWindow::createMenus() {
+    /* *** Create actions that will fill menus *** */
+    createActions();
+
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(saveAct);
     fileMenu->addAction(loadAct);
@@ -179,7 +177,6 @@ void MainWindow::createMenus() {
     designMenu = menuBar()->addMenu(tr("&Design"));
     designMenu->addAction(undoAct);
     designMenu->addAction(emptyDesignAct);
-    /* Infos sub-menu */
     infosSubMenu = designMenu->addMenu(tr("&Infos"));
     infosSubMenu->addAction(infoLedCountAct);
     infosSubMenu->addAction(infoSizeIrlAct);
@@ -193,83 +190,92 @@ void MainWindow::createMenus() {
 
 void MainWindow::createLabels() {
     /* Hardcoded IP for sizeHint.width() to be to the longest possible value */
-    ipLabel = new QLabel("IP            : 255.255.255.255");
-    ipLabel->setAlignment(Qt::AlignLeft);
-    /*ipLabel->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Ignored);
-    ipLabel->setBackgroundRole(QPalette::Dark);
-    ipLabel->setAutoFillBackground(true);*/
-    ipLabel->setFont({ "Source Code Pro" });
-    ipLabel->setGeometry(0, 0, ipLabel->sizeHint().width(), 10);
-    ipLabel->setText(QString("IP            : %1").arg(ipStr, 15));
+    ipLbl = new QLabel("IP            : 255.255.255.255");
+    ipLbl->setAlignment(Qt::AlignLeft);
+    ipLbl->setFont({ "Source Code Pro" });
+    ipLbl->setGeometry(0, 0, ipLbl->sizeHint().width(), 10);
+    ipLbl->setText(QString("IP            : %1").arg(ipStr, 15));
 
-    portLabel = new QLabel(QString("Port          : %1").arg(port, 15));
-    portLabel->setAlignment(Qt::AlignLeft);
-    portLabel->setFont({ "Source Code Pro" });
-    portLabel->setGeometry(0, 0, portLabel->sizeHint().width(), 10);
+    portLbl = new QLabel(QString("Port          : %1").arg(port, 15));
+    portLbl->setAlignment(Qt::AlignLeft);
+    portLbl->setFont({ "Source Code Pro" });
+    portLbl->setGeometry(0, 0, portLbl->sizeHint().width(), 10);
 
-    socketLabel = new QLabel(QString("Socket status : %1").arg(
-                             socketStatus ? "On" : "Off", 15));
-    socketLabel->setAlignment(Qt::AlignLeft);
-    socketLabel->setFont({ "Source Code Pro" });
-    socketLabel->setGeometry(0, 0, socketLabel->sizeHint().width(), 10);
+    scktLbl = new QLabel(QString("Socket status : %1").arg(
+                            scktStatus ? "On" : "Off", 15));
+    scktLbl->setAlignment(Qt::AlignLeft);
+    scktLbl->setFont({ "Source Code Pro" });
+    scktLbl->setGeometry(0, 0, scktLbl->sizeHint().width(), 10);
 
-    zoomPlusLabel = new QPushButton("+");
-    zoomPlusLabel->setFont({ "Source Code Pro" });
-    zoomPlusLabel->setFixedSize(20, 20);
-    connect(zoomPlusLabel, &QPushButton::clicked,
+    scktMovieLbl = new QLabel;
+    scktMovieLbl->setAlignment(Qt::AlignCenter);
+    scktMovieLbl->setFixedSize(ipLbl->size().width(), 150);
+    scktMovieLbl->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    scktMovieLbl->setAutoFillBackground(false);
+    createQMovies();
+    replaceSocketMovieWith(scktMovDisconn);
+
+    zoomPlusLbl = new QPushButton("+");
+    zoomPlusLbl->setFont({ "Source Code Pro" });
+    zoomPlusLbl->setFixedSize(20, 20);
+    connect(zoomPlusLbl, &QPushButton::clicked,
             [=](bool clicked) {
                 zoomSlider->setValue(zoomSlider->value() +
                                      zoomSlider->tickInterval());
             } );
 
-    zoomMinusLabel = new QPushButton("-");
-    zoomMinusLabel->setFont({ "Source Code Pro" });
-    zoomMinusLabel->setFixedSize(20, 20);
-    connect(zoomMinusLabel, &QPushButton::clicked,
+    zoomMinusLbl = new QPushButton("-");
+    zoomMinusLbl->setFont({ "Source Code Pro" });
+    zoomMinusLbl->setFixedSize(20, 20);
+    connect(zoomMinusLbl, &QPushButton::clicked,
             [=](bool clicked) {
                 zoomSlider->setValue(zoomSlider->value() -
                                      zoomSlider->tickInterval());
             } );
 }
-void MainWindow::createDropDownMenus() {
-    ledTypeDropDown      = new QComboBox;
-    ledPkgDropDown       = new QComboBox;
-    ledPkgUnitDropDown   = new QComboBox;
-    ledPlacementDropDown = new QComboBox;
 
-    ledTypeDropDown->addItem("WS2812");
-    ledTypeDropDown->addItem("SK6812");
-    ledTypeDropDown->setFixedSize(ledTypeDropDown->sizeHint().width(),
-                                  ledTypeDropDown->sizeHint().height());
-    connect(ledTypeDropDown, &QComboBox::currentIndexChanged,
+void MainWindow::createDropDownMenus() {
+    ledTypeDrpDn = new QComboBox;
+    ledTypeDrpDn->addItem("WS2812");
+    ledTypeDrpDn->addItem("SK6812");
+    ledTypeDrpDn->setFixedSize(ledTypeDrpDn->sizeHint().width(),
+                               ledTypeDrpDn->sizeHint().height());
+    connect(ledTypeDrpDn, &QComboBox::currentIndexChanged,
             [=](int index) {
                 if (logsTxtBox->isEnabled())
                     logsTxtBox->append(
                         QString("Drop-down \"LED Type\": [%1] %2").arg(
-                                ledTypeDropDown->currentIndex()).arg(
-                                ledTypeDropDown->currentText())
+                                ledTypeDrpDn->currentIndex()).arg(
+                                ledTypeDrpDn->currentText())
                     );
             } );
 
-    ledPkgDropDown->addItem("5050");
-    ledPkgDropDown->addItem("2020");
-    ledPkgDropDown->setFixedSize(ledPkgDropDown->sizeHint().width(),
-                                 ledPkgDropDown->sizeHint().height());
-    connect(ledPkgDropDown, &QComboBox::currentIndexChanged,
+    ledPkgDrpDn = new QComboBox;
+    ledPkgDrpDn->addItem("5050");
+    ledPkgDrpDn->addItem("2020");
+    ledPkgDrpDn->setFixedSize(ledPkgDrpDn->sizeHint().width(),
+                              ledPkgDrpDn->sizeHint().height());
+    connect(ledPkgDrpDn, &QComboBox::currentIndexChanged,
             [=](int index) {
                 if (logsTxtBox->isEnabled())
                     logsTxtBox->append(
                         QString("Drop-down \"LED Packaging\": [%1] %2").arg(
-                                ledPkgDropDown->currentIndex()).arg(
-                                ledPkgDropDown->currentText())
+                                ledPkgDrpDn->currentIndex()).arg(
+                                ledPkgDrpDn->currentText())
                     );
             } );
 
-    ledPkgUnitDropDown->addItem("[mm]");
-    ledPkgUnitDropDown->addItem("[inch]");
-    ledPkgUnitDropDown->setFixedSize(ledPkgUnitDropDown->sizeHint().width(),
-                                     ledPkgUnitDropDown->sizeHint().height());
-    connect(ledPkgUnitDropDown, &QComboBox::currentIndexChanged,
+    ledPkgGapLineEdit = new QLineEdit;
+    ledPkgGapLineEdit->setText(QString("0"));
+    ledPkgGapLineEdit->setMaxLength(5);
+    ledPkgGapLineEdit->setFixedSize(50, ledTypeDrpDn->sizeHint().height());
+
+    ledPkgUnitDrpDn = new QComboBox;
+    ledPkgUnitDrpDn->addItem("[mm]");
+    ledPkgUnitDrpDn->addItem("[inch]");
+    ledPkgUnitDrpDn->setFixedSize(ledPkgUnitDrpDn->sizeHint().width(),
+                                  ledPkgUnitDrpDn->sizeHint().height());
+    connect(ledPkgUnitDrpDn, &QComboBox::currentIndexChanged,
             [=](int index) {
                 if (index == 0) {
                     ledPkgGapLineEdit->setText(QString("%1").arg(
@@ -283,64 +289,67 @@ void MainWindow::createDropDownMenus() {
                     logsTxtBox->append(
                         QString("Drop-down \"LED Gap unit\": [%1] %2 | "
                                 "New value: %3").arg(
-                                ledPkgUnitDropDown->currentIndex()).arg(
-                                ledPkgUnitDropDown->currentText()).arg(
+                                ledPkgUnitDrpDn->currentIndex()).arg(
+                                ledPkgUnitDrpDn->currentText()).arg(
                                 ledPkgGapLineEdit->text())
                 );
             } );
 
-    ledPlacementDropDown->addItem("Single");
-    ledPlacementDropDown->addItem("Strip");
-    ledPlacementDropDown->setFixedSize(
-        ledPlacementDropDown->sizeHint().width(),
-        ledPlacementDropDown->sizeHint().height());
-    connect(ledPlacementDropDown, &QComboBox::currentIndexChanged,
+    ledPlacementDrpDn = new QComboBox;
+    ledPlacementDrpDn->addItem("Single");
+    ledPlacementDrpDn->addItem("Strip");
+    ledPlacementDrpDn->setFixedSize(ledPlacementDrpDn->sizeHint().width(),
+                                    ledPlacementDrpDn->sizeHint().height());
+    connect(ledPlacementDrpDn, &QComboBox::currentIndexChanged,
             [=](int index) {
                 if (logsTxtBox->isEnabled())
                     logsTxtBox->append(
                         QString("Drop-down \"LED Placement\": [%1] %2").arg(
-                                ledPlacementDropDown->currentIndex()).arg(
-                                ledPlacementDropDown->currentText())
+                                ledPlacementDrpDn->currentIndex()).arg(
+                                ledPlacementDrpDn->currentText())
                     );
             } );
 }
 
 void MainWindow::createInteractives() {
-
     btn = new QPushButton;
-    btn->setFixedSize(500, 500);
+    btn->setFixedSize(600, 600);
     btn->setStyleSheet("background-color: purple");
     connect(btn, &QPushButton::clicked, this, &MainWindow::close);
 
-    ledPkgGapLineEdit = new QLineEdit;
-    ledPkgGapLineEdit->setText(QString("0"));
-    ledPkgGapLineEdit->setMaxLength(5);
-    ledPkgGapLineEdit->setFixedSize(50,
-                                    ledTypeDropDown->sizeHint().height());
-
-    logsTxtBox = new QTextEdit;
-    logsTxtBox->setEnabled(false);
-    logsTxtBox->setVisible(false);
-    logsTxtBox->setReadOnly(true);  // RO as it is used for logs
-    logsTxtBox->setFont({ "Source Code Pro" });
-    logsTxtBox->setFixedWidth(ipLabel->size().width());
-    logsTxtBox->clear();
-
-    logsClearBtn = new QPushButton("Clear");
-    logsClearBtn->setFixedWidth(100);
-    logsClearBtn->setEnabled(false);    /* Enable button, only
-                                         * when checkbox checked */
-    connect( logsClearBtn, &QPushButton::clicked,
-             [=](bool checked){ logsTxtBox->clear(); } );
-
     logsCheckBox = new QCheckBox(QString("Show logs"));
     logsCheckBox->setCheckState(Qt::Unchecked);
+    logsCheckBox->setFixedSize(100, 25);
     connect(logsCheckBox, &QCheckBox::stateChanged,
             [=](int checked) {
                 logsClearBtn->setEnabled(checked);
                 logsTxtBox->setEnabled(checked);
                 logsTxtBox->setVisible(checked);
             } );
+
+    logsClearBtn = new QPushButton("Clear");
+    logsClearBtn->setFixedSize(100, logsCheckBox->size().height());
+    logsClearBtn->setEnabled(false);    /* Enable button, only
+                                         * when checkbox checked */
+    connect( logsClearBtn, &QPushButton::clicked,
+            [=](bool checked){ logsTxtBox->clear(); } );
+
+    logsTxtBox = new QTextEdit;
+    logsTxtBox->setEnabled(false);
+    logsTxtBox->setVisible(false);
+    logsTxtBox->setReadOnly(true);  // RO as it is used for logs
+    logsTxtBox->setFont({ "Source Code Pro" });
+    logsTxtBox->setFixedWidth(ipLbl->size().width());
+    /* ISSUE: When defining height, it'll create an empty space on Top
+     *        of the drawing area (btn here) and I don't know WHY?! */
+    /*logsTxtBox->setFixedSize(ipLbl->size().width(),
+                             btn->size().height() - (
+                                ipLbl->size().height() +
+                                portLbl->size().height() +
+                                scktLbl->size().height() +
+                                scktMovieLbl->size().height() +
+                                logsClearBtn->size().height()));*/
+    logsTxtBox->clear();
 
     zoomSlider = new QSlider;
     zoomSlider->setTickInterval(10);
@@ -350,75 +359,71 @@ void MainWindow::createInteractives() {
     zoomSlider->setOrientation(Qt::Orientation::Horizontal);
     zoomSlider->setFixedSize(btn->size().width()/2, 50);
 
-    socketMovieLabel = new QLabel;
-    socketMovieLabel->setAlignment(Qt::AlignCenter);
-    socketMovieLabel->setFixedSize(ipLabel->size().width(), 125);
-    socketMovieLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    socketMovieLabel->setAutoFillBackground(false);
-    createQMovies();
-    replaceSocketMovieWith(socketStatusMovieOff);
-
     rightJustifSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                             QSizePolicy::Minimum);
     rightJustifSpacers[1] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
-                                          QSizePolicy::Minimum);
+                                            QSizePolicy::Minimum);
     rightJustifSpacers[2] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                             QSizePolicy::Minimum);
-    logsAlignmentSpacer   = new QSpacerItem(ipLabel->size().width()        -
-                                              logsCheckBox->size().width() -
-                                              logsClearBtn->size().width(), 0,
+    logsAlignSpacer       = new QSpacerItem(ipLbl->size().width()        -
+                                            logsCheckBox->size().width() -
+                                            logsClearBtn->size().width() - 6, 0,
                                             QSizePolicy::Minimum,
                                             QSizePolicy::Minimum);
-    socketMovieSpacer     = new QSpacerItem(0,
-                                            socketMovieLabel->size().height(),
+    socketMovieSpacer     = new QSpacerItem(0, scktMovieLbl->size().height(),
                                             QSizePolicy::Minimum,
                                             QSizePolicy::Minimum);
 }
 
 void MainWindow::createLayouts() {
+    /* *** Create objects that will fill menus *** */
+    createLabels();
+    createDropDownMenus();
+    createInteractives();
+
     /* *** Objects creation *** */
-    /* '-> Layouts ****** */
-    toolsHLayout      = new QHBoxLayout;
-    socketLogsVLayout = new QVBoxLayout;
-    logsHLayout       = new QHBoxLayout;
-    ledHLayout        = new QHBoxLayout;
-    zoomHLayout       = new QHBoxLayout;
-    mainVLayout       = new QVBoxLayout;
+    /** Layouts ****** */
+    toolsHLayout    = new QHBoxLayout;
+    scktLogsVLayout = new QVBoxLayout;
+    logsHLayout     = new QHBoxLayout;
+    ledHLayout      = new QHBoxLayout;
+    zoomHLayout     = new QHBoxLayout;
+    mainVLayout     = new QVBoxLayout;
 
     /* *** Layouts filling *** */
-    /* '-> Tools layouts (Drop-down menus to configure LED to put) ******* */
-    toolsHLayout->addWidget(ledTypeDropDown);
-    toolsHLayout->addWidget(ledPkgDropDown);
+    /** Tools layouts (Drop-down menus to configure LED to put) ******* */
+    toolsHLayout->addWidget(ledTypeDrpDn);
+    toolsHLayout->addWidget(ledPkgDrpDn);
     toolsHLayout->addWidget(ledPkgGapLineEdit);
-    toolsHLayout->addWidget(ledPkgUnitDropDown);
-    toolsHLayout->addWidget(ledPlacementDropDown);
+    toolsHLayout->addWidget(ledPkgUnitDrpDn);
+    toolsHLayout->addWidget(ledPlacementDrpDn);
     toolsHLayout->addItem(rightJustifSpacers[0]);
 
-    /* '-> Socket infos + Logs ****** */
-    socketLogsVLayout->addWidget(ipLabel);
-    socketLogsVLayout->addWidget(portLabel);
-    socketLogsVLayout->addWidget(socketLabel);
-    socketLogsVLayout->addWidget(socketMovieLabel, 0, Qt::AlignmentFlag::AlignCenter);
-    socketLogsVLayout->addSpacerItem(socketMovieSpacer);
+    /** Socket infos + Logs ****** */
+    scktLogsVLayout->addWidget(ipLbl);
+    scktLogsVLayout->addWidget(portLbl);
+    scktLogsVLayout->addWidget(scktLbl);
+    scktLogsVLayout->addWidget(scktMovieLbl, 0, Qt::AlignCenter);
+    scktLogsVLayout->addSpacerItem(socketMovieSpacer);
     logsHLayout->addWidget(logsCheckBox);
-    logsHLayout->addItem(logsAlignmentSpacer);
+    logsHLayout->addItem(logsAlignSpacer);
     logsHLayout->addWidget(logsClearBtn);
-    socketLogsVLayout->addLayout(logsHLayout);
-    socketLogsVLayout->addWidget(logsTxtBox);
-    socketLogsVLayout->addStretch();
+    scktLogsVLayout->addLayout(logsHLayout);
+    scktLogsVLayout->addWidget(logsTxtBox);
+    scktLogsVLayout->addStretch();
 
-    /* '-> Display/Creation area + Socket & Logs ****** */
+    /** Display/Creation area + Socket & Logs ****** */
     ledHLayout->addWidget(btn/* Drawing area */);
-    ledHLayout->addLayout(socketLogsVLayout);
+    ledHLayout->addLayout(scktLogsVLayout);
     ledHLayout->addItem(rightJustifSpacers[1]);
 
-    /* '-> Zoom layout with Slider & Clickable Labels */
-    zoomHLayout->addWidget(zoomMinusLabel);
+    /** Zoom layout with Slider & Clickable Labels */
+    zoomHLayout->addWidget(zoomMinusLbl);
     zoomHLayout->addWidget(zoomSlider);
-    zoomHLayout->addWidget(zoomPlusLabel);
+    zoomHLayout->addWidget(zoomPlusLbl);
     zoomHLayout->addItem(rightJustifSpacers[2]);
 
-    /* '-> Main Layout ****** */
+    /** Main Layout ****** */
     mainVLayout->addLayout(toolsHLayout);
     mainVLayout->addLayout(ledHLayout);
     mainVLayout->addLayout(zoomHLayout);
@@ -429,9 +434,9 @@ void createQMovie(QString filename, QMovie **movie, int &lblW, int &lblH) {
     int movieW, movieH;
 
     *movie = new QMovie(filename);
-    //(*movie)->setCacheMode(QMovie::CacheAll);
+    (*movie)->setCacheMode(QMovie::CacheAll);
 
-    /* Jump to 1st frame to get its dimension */
+    /* Jump to 1st frame to retrieve dimensions */
     (*movie)->jumpToFrame(0);
     movieW = (*movie)->currentImage().size().width();
     movieH = (*movie)->currentImage().size().height();
@@ -443,26 +448,25 @@ void createQMovie(QString filename, QMovie **movie, int &lblW, int &lblH) {
 }
 
 void MainWindow::createQMovies(void) {
-    int lblW = socketMovieLabel->size().width(),
-        lblH = socketMovieLabel->size().height();
+    int lblW = scktMovieLbl->size().width(),
+        lblH = scktMovieLbl->size().height();
 
-    createQMovie("../../assets/loading_wo_bg.gif",    &socketStatusMovieOff,
+    createQMovie("../../assets/loading_wo_bg.gif",    &scktMovDisconn,
                  lblW, lblH);
-    createQMovie("../../assets/someKindOfPortal.gif", &socketStatusMovieOn,
+    createQMovie("../../assets/someKindOfPortal.gif", &scktMovConnect,
                  lblW, lblH);
-    createQMovie("../../assets/waves.gif", &socketStatusMovieWait, lblW, lblH);
+    createQMovie("../../assets/waves.gif", &scktMovWaiting,
+                 lblW, lblH);
 }
 
 void MainWindow::replaceSocketMovieWith(QMovie *movie) {
-
-    if (socketStatusMovieOff->state() == QMovie::Running)
-        socketStatusMovieOff->stop();
-    else if (socketStatusMovieOn->state() == QMovie::Running)
-        socketStatusMovieOn->stop();
+    if (scktMovDisconn->state() == QMovie::Running)
+        scktMovDisconn->stop();
+    else if (scktMovConnect->state() == QMovie::Running)
+        scktMovConnect->stop();
     else /* (socketStatusMovieWait->state() == QMovie::Running) */
-        socketStatusMovieWait->stop();
+        scktMovWaiting->stop();
 
-    socketMovieLabel->setMovie(movie);
+    scktMovieLbl->setMovie(movie);
     movie->start();
 }
-

@@ -72,49 +72,50 @@ private:
     QAction *cfgSocketAct = nullptr;
 
     /* Layouts */
-    QVBoxLayout *mainVLayout       = nullptr;
-    QHBoxLayout *toolsHLayout      = nullptr;
-    QHBoxLayout *ledHLayout        = nullptr;
-    QVBoxLayout *socketLogsVLayout = nullptr;
-    QHBoxLayout *logsHLayout       = nullptr;
-    QHBoxLayout *zoomHLayout       = nullptr;
+    QVBoxLayout *mainVLayout     = nullptr;
+    QHBoxLayout *toolsHLayout    = nullptr;
+    QHBoxLayout *ledHLayout      = nullptr;
+    QVBoxLayout *scktLogsVLayout = nullptr;
+    QHBoxLayout *logsHLayout     = nullptr;
+    QHBoxLayout *zoomHLayout     = nullptr;
 
     /* Interactives */
     QCheckBox   *logsCheckBox = nullptr;
     QPushButton *logsClearBtn = nullptr;
 
-    QComboBox *ledTypeDropDown      = nullptr;
-    QComboBox *ledPkgDropDown       = nullptr;
-    QLineEdit *ledPkgGapLineEdit    = nullptr;
-    QComboBox *ledPkgUnitDropDown   = nullptr;
-    QComboBox *ledPlacementDropDown = nullptr;
-
-    QSlider *zoomSlider;
-
-    QPushButton *btn;
+    QComboBox *ledTypeDrpDn      = nullptr;
+    QComboBox *ledPkgDrpDn       = nullptr;
+    QLineEdit *ledPkgGapLineEdit = nullptr;
+    QComboBox *ledPkgUnitDrpDn   = nullptr;
+    QComboBox *ledPlacementDrpDn = nullptr;
 
     /* Labels, Datas & Stuffs */
-    QLabel *ipLabel = nullptr;
-    QString ipStr   = "127.0.0.1";
+    QLabel *ipLbl = nullptr;
+    QString ipStr = "127.0.0.1";
 
-    QLabel *portLabel = nullptr;
-    int     port      = 5000;
+    QLabel *portLbl = nullptr;
+    int     port    = 5000;
 
-    QLabel *socketLabel          = nullptr;
-    bool    socketStatus         = false;
-    QLabel *socketMovieLabel     = nullptr;
-    QMovie *socketStatusMovieOn  = nullptr;
-    QMovie *socketStatusMovieOff = nullptr;
-    QMovie *socketStatusMovieWait = nullptr;
+    QLabel *scktLbl        = nullptr;
+    bool    scktStatus     = false;
+    QLabel *scktMovieLbl   = nullptr;
+    QMovie *scktMovConnect = nullptr;
+    QMovie *scktMovDisconn = nullptr;
+    QMovie *scktMovWaiting = nullptr;
 
-    QTextEdit *logsTxtBox        = nullptr;
+    QTextEdit *logsTxtBox  = nullptr;
+
+    QSlider *zoomSlider       = nullptr;;
     /* Clickable Label implemented as QPushButton for the clicked event */
-    QPushButton *zoomPlusLabel   = nullptr;
-    QPushButton *zoomMinusLabel  = nullptr;
+    QPushButton *zoomPlusLbl  = nullptr;
+    QPushButton *zoomMinusLbl = nullptr;
 
     /* Spacers */
     QSpacerItem *rightJustifSpacers[3];
-    QSpacerItem *logsAlignmentSpacer;
+    QSpacerItem *logsAlignSpacer;
     QSpacerItem *socketMovieSpacer;
+
+    /* Button still present for drawing area position */
+    QPushButton *btn;
 };
 #endif // MAINWINDOW_H
