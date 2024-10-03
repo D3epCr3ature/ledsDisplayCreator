@@ -47,8 +47,8 @@ private:
     void createDropDownMenus();
     void createInteractives();
     void createLayouts();
-    void updateSocketMovie(QString filename);
-    void updateSocketMovie(const char *filename);
+    void createQMovies(void);
+    void replaceSocketMovieWith(QMovie *movie);
 
     /* Menus */
     QMenu *fileMenu = nullptr;
@@ -100,10 +100,12 @@ private:
     QLabel *portLabel = nullptr;
     int     port      = 5000;
 
-    QLabel *socketLabel      = nullptr;
-    bool    socketStatus     = false;
-    QLabel *socketMovieLabel = nullptr;
-    QMovie *socketMovie      = nullptr;
+    QLabel *socketLabel          = nullptr;
+    bool    socketStatus         = false;
+    QLabel *socketMovieLabel     = nullptr;
+    QMovie *socketStatusMovieOn  = nullptr;
+    QMovie *socketStatusMovieOff = nullptr;
+    QMovie *socketStatusMovieWait = nullptr;
 
     QTextEdit *logsTxtBox        = nullptr;
     /* Clickable Label implemented as QPushButton for the clicked event */

@@ -69,23 +69,25 @@ void MainWindow::cfgSocketInfos() {
 
 void MainWindow::startServer() {
     /* TODO */
-    updateSocketMovie("../../assets/someKindOfPortal.gif");
 
     startSvrAct->setEnabled(socketStatus);
     socketStatus = true;
     socketLabel->setText(QString("Socket status : %1").arg("On", 15));
     stopSvrAct->setEnabled(socketStatus);
+
+    replaceSocketMovieWith(socketStatusMovieOn);
 }
 
 void MainWindow::stopServer() {
     /* TODO */
-    updateSocketMovie("../../assets/loading_wo_bg.gif");
 
-    /* Set true, as at start, socketStatus == false */
+    /* Set true, at start, socketStatus == false */
     startSvrAct->setEnabled(true);
     socketStatus = false;
     socketLabel->setText(QString("Socket status : %1").arg("Off", 15));
     stopSvrAct->setEnabled(socketStatus);
+
+    replaceSocketMovieWith(socketStatusMovieOff);
 }
 
 void MainWindow::createActions() {
@@ -353,10 +355,8 @@ void MainWindow::createInteractives() {
     socketMovieLabel->setFixedSize(ipLabel->size().width(), 125);
     socketMovieLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     socketMovieLabel->setAutoFillBackground(false);
-    socketMovie = new QMovie;
-    socketMovie->setCacheMode(QMovie::CacheAll);
-    socketMovieLabel->setMovie(socketMovie);
-    updateSocketMovie("../../assets/loading_wo_bg.gif");
+    createQMovies();
+    replaceSocketMovieWith(socketStatusMovieOff);
 
     rightJustifSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                             QSizePolicy::Minimum);
@@ -425,29 +425,44 @@ void MainWindow::createLayouts() {
     mainVLayout->addStretch();
 }
 
-void MainWindow::updateSocketMovie(QString filename) {
-    static int lblW = socketMovieLabel->size().width(),
-               lblH = socketMovieLabel->size().height();
-    static int movieW = 0, movieH = 0;
+void createQMovie(QString filename, QMovie **movie, int &lblW, int &lblH) {
+    int movieW, movieH;
 
-    /* Stop to change filename */
-    socketMovie->stop();
-    socketMovie->setFileName(filename);
+    *movie = new QMovie(filename);
+    //(*movie)->setCacheMode(QMovie::CacheAll);
 
     /* Jump to 1st frame to get its dimension */
-    socketMovie->jumpToFrame(0);
-    movieW = socketMovie->currentImage().size().width();
-    movieH = socketMovie->currentImage().size().height();
+    (*movie)->jumpToFrame(0);
+    movieW = (*movie)->currentImage().size().width();
+    movieH = (*movie)->currentImage().size().height();
 
-    if (movieW <= movieH) {
-        socketMovie->setScaledSize({ movieW * lblH / movieH, lblH });
-    } else {
-        socketMovie->setScaledSize({ lblW, lblW * movieH / movieW });
-    }
-
-    socketMovie->start();
+    if (movieW <= movieH)
+        (*movie)->setScaledSize({ movieW * lblH / movieH, lblH });
+    else
+        (*movie)->setScaledSize({ lblW, lblW * movieH / movieW });
 }
 
-void MainWindow::updateSocketMovie(const char *filename) {
-    updateSocketMovie(QString(filename));
+void MainWindow::createQMovies(void) {
+    int lblW = socketMovieLabel->size().width(),
+        lblH = socketMovieLabel->size().height();
+
+    createQMovie("../../assets/loading_wo_bg.gif",    &socketStatusMovieOff,
+                 lblW, lblH);
+    createQMovie("../../assets/someKindOfPortal.gif", &socketStatusMovieOn,
+                 lblW, lblH);
+    createQMovie("../../assets/waves.gif", &socketStatusMovieWait, lblW, lblH);
 }
+
+void MainWindow::replaceSocketMovieWith(QMovie *movie) {
+
+    if (socketStatusMovieOff->state() == QMovie::Running)
+        socketStatusMovieOff->stop();
+    else if (socketStatusMovieOn->state() == QMovie::Running)
+        socketStatusMovieOn->stop();
+    else /* (socketStatusMovieWait->state() == QMovie::Running) */
+        socketStatusMovieWait->stop();
+
+    socketMovieLabel->setMovie(movie);
+    movie->start();
+}
+
