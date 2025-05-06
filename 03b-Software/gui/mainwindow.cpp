@@ -320,8 +320,8 @@ void MainWindow::createInteractives() {
     logsCheckBox = new QCheckBox(QString("Show logs"));
     logsCheckBox->setCheckState(Qt::Unchecked);
     logsCheckBox->setFixedSize(100, 25);
-    connect(logsCheckBox, &QCheckBox::stateChanged,
-            [=](int checked) {
+    connect(logsCheckBox, &QCheckBox::checkStateChanged,
+            [=](Qt::CheckState checked) {
                 logsClearBtn->setEnabled(checked);
                 logsTxtBox->setEnabled(checked);
                 logsTxtBox->setVisible(checked);
