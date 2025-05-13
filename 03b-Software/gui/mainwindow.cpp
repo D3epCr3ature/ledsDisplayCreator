@@ -42,11 +42,18 @@ MainWindow::~MainWindow() {}
 
 /* *** File actions ******************************************************** */
 void MainWindow::saveDesign() {
-    /* TODO */
+    saveDisplay(display->getDisplay());
 }
 
 void MainWindow::loadDesign() {
-    /* TODO */
+    struct LEDDisplay tmp;
+
+    if ( ! openDisplay(tmp) ) {
+        return;
+    }
+
+    display->setDisplay(tmp);
+    display->updateScene();
 }
 
 /* *** Design actions ****************************************************** */
@@ -55,7 +62,7 @@ void MainWindow::undoAction() {
 }
 
 void MainWindow::emptyDesign() {
-    /* TODO */
+    display->clearScene();
 }
 
 void MainWindow::infoLedsCount() {

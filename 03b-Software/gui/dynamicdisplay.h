@@ -33,6 +33,7 @@ public:
 
     /* */
     void removeLedAt(int idx);
+    void removeAllLeds();
 
     /* */
     size_t getNumberOfLeds();
