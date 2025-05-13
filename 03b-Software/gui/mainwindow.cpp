@@ -18,7 +18,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     display = new DynamicDisplay;
 
-    display->setSceneRect(0, 0, 2000, 2000);
+    display->setSceneRect(0, 0, 5000, 5000);
     display->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     display->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     display->setMinimumSize(300, 300);
@@ -67,6 +67,9 @@ void MainWindow::emptyDesign() {
 
 void MainWindow::infoLedsCount() {
     /* TODO */
+    if (logsTxtBox->isEnabled())
+        logsTxtBox->append(
+            QString("# of LEDs: %1").arg(display->getNumberOfLeds()) );
 }
 
 void MainWindow::infoSizeIrl() {
@@ -367,14 +370,40 @@ void MainWindow::createInteractives() {
                                 logsClearBtn->size().height()));*/
     logsTxtBox->clear();
 
-    zoomSlider = new QSlider;
-    zoomSlider->setTickInterval(10);
-    zoomSlider->setMinimum(0);
-    zoomSlider->setMaximum(200);
-    zoomSlider->setValue(100);
-    zoomSlider->setOrientation(Qt::Orientation::Horizontal);
-    //zoomSlider->setFixedSize(btn->size().width()/2, 50);
+    zoomSlider = new QSlider(Qt::Orientation::Horizontal);
+    zoomSlider->setTickInterval(1);
+    /* Set highest jump when clicking on slider and not sliding the handle */
+    zoomSlider->setPageStep(zoomSlider->tickInterval());
+    zoomSlider->setRange(1, 40);
+    zoomSlider->setValue((zoomSlider->maximum() - zoomSlider->minimum()) / 2 + 1);
+    zoomSlider->setStyleSheet("QSlider::groove:horizontal {"    /* Back bar */
+                                "background: #DCDCDC;"
+                                "border: 1px solid #999999;"
+                                "height: 2.5px;"
+                                "border-radius: 2px;"
+                              "}"
+                              "QSlider::handle:horizontal {"    /* Handle */
+                                "background: white;"
+                                "border: 1px solid #999999;"
+                                "width:  12px;"
+                                "margin: -5px 0;"   /* <=> groove's height */
+                                "border-radius: 3px;"
+                              "}");
     zoomSlider->setFixedSize(display->size().width()/2, 50);
+    connect(zoomSlider, &QSlider::valueChanged, this, [=](int value) {
+        static int oldValue = (zoomSlider->maximum() - zoomSlider->minimum()) / 2 + 1;
+        static double newScale = 0.0;
+        newScale = 1 + (zoomSlider->value() - oldValue) / 10.0;
+
+        display->scale(newScale, newScale);
+        display->show();
+
+        if (logsTxtBox->isEnabled())
+            logsTxtBox->append(
+                QString("Slider: %1 | newScale = %2").arg(zoomSlider->value()).arg(newScale));
+
+        oldValue = zoomSlider->value();
+    });
 
     rightJustifSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                             QSizePolicy::Minimum);
