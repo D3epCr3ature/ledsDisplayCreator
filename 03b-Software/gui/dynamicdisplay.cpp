@@ -107,9 +107,11 @@ void DisplayScene::addLedToDisplay(const QPointF &pos, double radius,
 }
 
 inline void DisplayScene::removeLedAt(int idx) {
-    static size_t i = 0;
-
     display.leds.erase(display.leds.begin()+idx);
+}
+
+inline void DisplayScene::removeAllLeds() {
+    display.leds.erase(display.leds.begin(), display.leds.end());
 }
 
 size_t DisplayScene::getNumberOfLeds() {
@@ -190,6 +192,8 @@ void DynamicDisplay::updateScene() {
 
 void DynamicDisplay::clearScene() {
     scene->clear();
+    scene->removeAllLeds();
+    updateScene();
 }
 
 void DynamicDisplay::setDisplay(const struct LEDDisplay& display) {
