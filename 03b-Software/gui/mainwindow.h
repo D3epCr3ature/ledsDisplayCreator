@@ -83,6 +83,7 @@ private:
 
     /* Interactives */
     QCheckBox   *logsCheckBox = nullptr;
+    QCheckBox   *xRayCheckBox = nullptr;
     QPushButton *logsClearBtn = nullptr;
 
     QComboBox *ledTypeDrpDn      = nullptr;

@@ -336,6 +336,15 @@ void MainWindow::createInteractives() {
     btn->setStyleSheet("background-color: purple");
     connect(btn, &QPushButton::clicked, this, &MainWindow::close);*/
 
+    xRayCheckBox = new QCheckBox(QString("X-Ray"));
+    xRayCheckBox->setCheckState(Qt::Unchecked);
+    xRayCheckBox->setFixedSize(100, 25);
+    connect(xRayCheckBox, &QCheckBox::checkStateChanged,
+            [=](Qt::CheckState checked) {
+                display->toggleXRay();
+                display->updateScene();
+            } );
+
     logsCheckBox = new QCheckBox(QString("Show logs"));
     logsCheckBox->setCheckState(Qt::Unchecked);
     logsCheckBox->setFixedSize(100, 25);
@@ -468,6 +477,7 @@ void MainWindow::createLayouts() {
     zoomHLayout->addWidget(zoomMinusLbl);
     zoomHLayout->addWidget(zoomSlider);
     zoomHLayout->addWidget(zoomPlusLbl);
+    zoomHLayout->addWidget(xRayCheckBox);
     zoomHLayout->addItem(rightJustifSpacers[2]);
 
     /** Main Layout ****** */
