@@ -15,6 +15,8 @@
 #include <QSpacerItem>
 #include <QTextEdit>
 
+#include "dynamicdisplay.h"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -116,6 +118,7 @@ private:
     QSpacerItem *socketMovieSpacer;
 
     /* Button still present for drawing area position */
-    QPushButton *btn;
+    //QPushButton *btn;
+    DynamicDisplay *display;
 };
 #endif // MAINWINDOW_H

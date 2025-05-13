@@ -13,7 +13,16 @@
 #include <QSpacerItem>
 #include <QTextEdit>
 
+#include "structure/display.h"
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+    display = new DynamicDisplay;
+
+    display->setSceneRect(0, 0, 2000, 2000);
+    display->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    display->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    display->setMinimumSize(300, 300);
+
     createMenus();
     createLayouts();
 
@@ -312,10 +321,10 @@ void MainWindow::createDropDownMenus() {
 }
 
 void MainWindow::createInteractives() {
-    btn = new QPushButton;
+    /*btn = new QPushButton;
     btn->setFixedSize(600, 600);
     btn->setStyleSheet("background-color: purple");
-    connect(btn, &QPushButton::clicked, this, &MainWindow::close);
+    connect(btn, &QPushButton::clicked, this, &MainWindow::close);*/
 
     logsCheckBox = new QCheckBox(QString("Show logs"));
     logsCheckBox->setCheckState(Qt::Unchecked);
@@ -357,7 +366,8 @@ void MainWindow::createInteractives() {
     zoomSlider->setMaximum(200);
     zoomSlider->setValue(100);
     zoomSlider->setOrientation(Qt::Orientation::Horizontal);
-    zoomSlider->setFixedSize(btn->size().width()/2, 50);
+    //zoomSlider->setFixedSize(btn->size().width()/2, 50);
+    zoomSlider->setFixedSize(display->size().width()/2, 50);
 
     rightJustifSpacers[0] = new QSpacerItem(50, 0, QSizePolicy::Expanding,
                                             QSizePolicy::Minimum);
@@ -413,7 +423,8 @@ void MainWindow::createLayouts() {
     scktLogsVLayout->addStretch();
 
     /** Display/Creation area + Socket & Logs ****** */
-    ledHLayout->addWidget(btn/* Drawing area */);
+    //ledHLayout->addWidget(btn/* Drawing area */);
+    ledHLayout->addWidget(display);
     ledHLayout->addLayout(scktLogsVLayout);
     ledHLayout->addItem(rightJustifSpacers[1]);
 
