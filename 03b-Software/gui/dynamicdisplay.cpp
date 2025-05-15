@@ -185,7 +185,14 @@ void DynamicDisplay::updateScene() {
         for (i = 0; i < scene->getNumberOfLeds(); i++) {
             auto led = scene->getLedAtIndex(i);
             auto color = QColor(led.color.r, led.color.g, led.color.b);
-            scene->addEllipse(led.position.x, led.position.y, led.radius, led.radius, QPen(Qt::black), color);
+
+            /* LED chip's case */
+            QGraphicsRectItem *r = scene->addRect(led.position.x, led.position.y, led.radius, led.radius, QPen(Qt::black), QColor(0xE0, 0xE0, 0xE0));
+            r->setTransformOriginPoint(r->rect().center());
+            r->setRotation(90-led.angle);
+
+            /* LED colored zone */
+            scene->addEllipse(led.position.x+5, led.position.y+5, led.radius-10, led.radius-10, QPen(Qt::black), color);
         }
     }
 }
