@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QMovie>
 #include <QPushButton>
 #include <QSlider>
@@ -14,6 +15,11 @@
 #include <QTextEdit>
 
 #include "structure/display.h"
+
+#define HEXA_16BITS_NDIGITS  2*sizeof(uint16_t)
+#define HEXA_32BITS_NDIGITS  2*sizeof(uint32_t)
+#define NUMERICAL_BASE_16   16
+#define TO_UINT8(DIGIT) (DIGIT) - '0'
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     display = new DynamicDisplay;
@@ -83,6 +89,13 @@ void MainWindow::cfgSocketInfos() {
 
 void MainWindow::startServer() {
     /* TODO */
+    if ( ! tcpServer->listen(QHostAddress("127.0.0.1"), 5000) ) {
+        QMessageBox::critical(this, tr("Socket's server"),
+                              tr("Unable to start the server: %1.")
+                                  .arg(tcpServer->errorString()));
+        close();
+        return;
+    }
 
     startSvrAct->setEnabled(false);
     scktStatus = true;
@@ -94,6 +107,27 @@ void MainWindow::startServer() {
 
 void MainWindow::stopServer() {
     /* TODO */
+    if (cltConnection) {
+        /* Send a leaving message to inform the client and
+             * allow it to reset its state as
+             * QTcpSocket::disconnectFromHost() is used below */
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setByteOrder(QDataStream::LittleEndian);
+
+        /* /!\ Does not work properly using C string (out << "Hi";) /!\
+             * Answer: It might be because a C-string is then cast as
+             *         a QString and this stores each data
+             *         as uint16_t instead of uint8_t */
+        out << QByteArray("Leaving");
+
+        cltConnection->write(block);
+        cltConnection->flush();
+
+        cltConnection->disconnectFromHost();
+        cltConnection = nullptr;
+    }
+    tcpServer->close();
 
     /* Set true because, at start, socketStatus == false */
     startSvrAct->setEnabled(true);
@@ -161,6 +195,12 @@ void MainWindow::createActions() {
             this, &MainWindow::infoSizeIrl);
 
     /* TCP Socket actions ********************************************* */
+    tcpServer = new QTcpServer(this);
+    connect(tcpServer, &QTcpServer::newConnection,
+            this, &MainWindow::connectionSucessToClient);
+
+    inStream.setByteOrder(QDataStream::LittleEndian);
+
     /** Start socket ****** */
     startSvrAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
                               tr("St&art server"), this);
@@ -526,4 +566,128 @@ void MainWindow::replaceSocketMovieWith(QMovie *movie) {
 
     scktMovieLbl->setMovie(movie);
     movie->start();
+}
+
+/** **************************************************************************
+ * @brief Client's request reader
+ *************************************************************************** */
+void MainWindow::readCltRequest(void) {
+    inStream.startTransaction();
+
+    static QByteArray streamAsBytes;
+    inStream >> streamAsBytes;
+
+    if ( ! inStream.commitTransaction() )   return;
+
+    if (logsTxtBox->isEnabled()) {
+        logsTxtBox->append(QString("Input           : %1").arg(streamAsBytes));
+    }
+
+    if ( cltConnection->bytesAvailable() ) {
+        return;
+    }
+
+    /** Detect client's leave
+     *  + toLower() Hypothesis:
+     *  Upper -> Lower is optimized because UpperCase + offset = LowerCase
+     *  instead of a substraction LowerCase - offset = UpperCase */
+    if (streamAsBytes.toLower() == QByteArray("leaving")) {
+        cltConnection = nullptr;
+        return;
+    }
+
+    if (logsTxtBox->isEnabled()) {
+        logsTxtBox->append(QString("bytesAvailable(): %1").arg(cltConnection->bytesAvailable()));
+        logsTxtBox->append(QString("Input           : %1").arg(streamAsBytes));
+    }
+
+    /* REGEX part: ^\!
+     *             C[3-4]
+     *             N(([A-F]|[a-f]|[0-9]){4}),
+     *             .{4})+
+     *             \$$
+     * Accept data, like:  1data  - !C3N0001,<uint32_val>$
+                          10datas - !C3N000A,<uint32_val1>...<uint32_valN>$ */
+    static QRegularExpression re("^\\!C[3-4]N(([A-F]|[a-f]|[0-9]){4}),"
+                                 "(.{4})+\\$$");
+    if (re.match(streamAsBytes).hasMatch()) {
+        /* Remove starting "!C" & terminating '$' sequences */
+        streamAsBytes.remove(0, 2);
+        streamAsBytes.removeLast();
+
+        uint16_t n;
+        uint8_t  comp;
+        uint8_t  r, g, b, w;
+
+        /* Extract composants & # of data (16bits <=> 4 hexa digits) */
+        bool okDbg = true;
+        comp = TO_UINT8(streamAsBytes.at(0));   /* -'0': From char to uint8 */
+        streamAsBytes.remove(0, 2);             /* Remove digit + 'N' */
+        /* ISSUE: Below not working?!?!
+         * Hypothesis: Not isolated, so doesn't work with suffix */
+        //n = streamAsBytes.toUShort(&okDbg, NUMERICAL_BASE_16);
+        n = streamAsBytes.first(HEXA_16BITS_NDIGITS)
+                .toUShort(&okDbg, NUMERICAL_BASE_16);
+        /* Remove digits + ',' before datas */
+        streamAsBytes.remove(0, HEXA_16BITS_NDIGITS+1);
+
+        /* Check MAX limit & overwrite value if needed */
+        if (n > display->getNumberOfLeds())
+            n = display->getNumberOfLeds();
+
+        if (comp == 3) {
+            for (uint16_t i = 0; i < n; i++) {
+                r = streamAsBytes.at(0);
+                g = streamAsBytes.at(1);
+                b = streamAsBytes.at(2);
+                display->setLedColor(i, QColor(r, g, b));
+
+                streamAsBytes.remove(0, sizeof(uint32_t));
+            }
+        } else if (comp == 4) {
+            /* Treat 4 components as one WHITE channel
+             * and, for now, set all channels to this value */
+            for (uint32_t i = 0; i < n; i++) {
+                w = streamAsBytes.at(3);
+                display->setLedColor(i, QColor(w, w, w));
+
+                streamAsBytes.remove(0, sizeof(uint32_t));
+            }
+        } else  return; /* Do nothing and end function */
+
+        display->updateScene();
+        //display->update();
+    } else {
+        if (logsTxtBox->isEnabled()) {
+            logsTxtBox->append(QString("readCltRequest: RegEx failed to pass"));
+            logsTxtBox->append(QString("Input: %1").arg(streamAsBytes));
+        }
+    }
+}
+
+/** **************************************************************************
+ * @brief Client's connection approval
+ *************************************************************************** */
+void MainWindow::connectionSucessToClient(void) {
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setByteOrder(QDataStream::LittleEndian);
+
+    /* /!\ Doesn't work properly using C string (out << "Hi";) /!\
+     * Answer: It might be because a C-string is then cast as a QString and
+     *         this stores each data as uint16_t instead of uint8_t */
+    out << QByteArray("Connection successful");
+
+    if ( ! cltConnection ) {
+        cltConnection = tcpServer->nextPendingConnection();
+        connect(cltConnection, &QAbstractSocket::disconnected,
+                cltConnection, &QObject::deleteLater);
+
+        inStream.setDevice(cltConnection);
+        connect(cltConnection, &QIODevice::readyRead,
+                this, &MainWindow::readCltRequest);
+    }
+
+    cltConnection->write(block);
+    cltConnection->flush();
 }

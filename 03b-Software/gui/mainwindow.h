@@ -13,6 +13,8 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QSpacerItem>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QTextEdit>
 
 #include "dynamicdisplay.h"
@@ -41,6 +43,9 @@ private slots:
     void startServer();
     void stopServer();
     void cfgSocketInfos();
+
+    void connectionSucessToClient(void);
+    void readCltRequest(void);
 
 private:
     void createActions();
@@ -121,5 +126,11 @@ private:
     /* Button still present for drawing area position */
     //QPushButton *btn;
     DynamicDisplay *display;
+
+    /* Socket stuff */
+    bool serverStatus = false;
+    QTcpServer  *tcpServer = nullptr;
+    QDataStream inStream;
+    QTcpSocket  *cltConnection = nullptr;
 };
 #endif // MAINWINDOW_H
