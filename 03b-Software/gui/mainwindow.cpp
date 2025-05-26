@@ -53,10 +53,13 @@ void MainWindow::saveDesign() {
 
 void MainWindow::loadDesign() {
     struct LEDDisplay tmp;
+    std::string filename;
 
-    if ( ! openDisplay(tmp) ) {
+    if ( ! openDisplay(tmp, filename) ) {
         return;
     }
+
+    setWindowTitle(QString("LEDs Display Creator: %1").arg(filename));
 
     display->setDisplay(tmp);
     display->updateScene();
@@ -69,6 +72,8 @@ void MainWindow::undoAction() {
 
 void MainWindow::emptyDesign() {
     display->clearScene();
+
+    setWindowTitle(QString("LEDs Display Creator"));
 }
 
 void MainWindow::infoLedsCount() {

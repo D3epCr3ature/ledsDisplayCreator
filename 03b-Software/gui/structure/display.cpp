@@ -3,22 +3,25 @@
 
 #include "json.hpp"
 #include <fstream>
-#include <string>
 
 #include <QFileDialog>
+#include <QCoreApplication>
 
-bool openDisplay(struct LEDDisplay& display) {
+bool openDisplay(struct LEDDisplay& display, std::string &fname) {
     QString filename = QFileDialog::getOpenFileName(nullptr, QFileDialog::tr("Open display"),
-                                                    QDir::currentPath(),
-                                                    QFileDialog::tr("Display file (*.disp)"));
+                                                    QDir::currentPath()+"/../../displays/",
+                                                    QFileDialog::tr("Display file (*.disp *.display)"/*;;All files (*)"*/));
     if ( filename.isNull() ) {
         return false;
     }
 
     QFile file(filename);   // PATH Checked from getOpenFileName()
     QFileInfo infos(filename);
+    fname = infos.fileName().toStdString();
 
-    if ( infos.suffix().compare("disp") ) {
+    /* If one of the supported suffix is present, .compare() will return 0 as success.
+       With the AND op., we simply "overwrite" the other's result. */
+    if (infos.suffix().compare("disp") & infos.suffix().compare("display")) {
         return false;
     }
 

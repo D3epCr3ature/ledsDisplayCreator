@@ -13,7 +13,7 @@ struct LEDDisplay {
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(LEDDisplay, leds)
 };
 
-bool openDisplay(struct LEDDisplay &display);
+bool openDisplay(struct LEDDisplay &display, std::string &fname);
 
 bool saveDisplay(const LEDDisplay& display, const std::string& path);
 bool saveDisplay(const LEDDisplay& display);
