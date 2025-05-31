@@ -7,7 +7,27 @@ This tool offers to create a custom LEDs display and to communicate with it, thr
 
 - *How to use it*
 
-- *Protocol implemented*
+  1. Launch an instance of the [**GUI program**](03b-Software/gui)
+
+     - Configure the socket's IP & Port (TODO: yet to implement)
+
+     - OR use the default:
+
+       - IP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **127.0.0.1**
+
+       - Port&nbsp;: **5000**
+
+  2. Driver application
+  
+     You can either:
+     
+     - Create your application that instanciate a TCP socket to the GUI.
+     
+     - OR use one of the [**samples written**](03b-Software/cli) in C.
+
+
+
+- [**Protocol implemented**](01-Doc/protocol/protocol.md)
 
 - **
 
