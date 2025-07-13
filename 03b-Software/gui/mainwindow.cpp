@@ -16,6 +16,8 @@
 
 #include "structure/display.h"
 
+#include "../protocol_src/protocol_routing_variables.h"
+
 #define HEXA_16BITS_NDIGITS  2*sizeof(uint16_t)
 #define HEXA_32BITS_NDIGITS  2*sizeof(uint32_t)
 #define NUMERICAL_BASE_16   16
@@ -120,11 +122,8 @@ void MainWindow::stopServer() {
         QDataStream out(&block, QIODevice::WriteOnly);
         out.setByteOrder(QDataStream::LittleEndian);
 
-        /* /!\ Does not work properly using C string (out << "Hi";) /!\
-             * Answer: It might be because a C-string is then cast as
-             *         a QString and this stores each data
-             *         as uint16_t instead of uint8_t */
-        out << QByteArray("Leaving");
+        char tmp = PROTOCOL_COMMON_ACTION::LEAVE_SHUTDOWN;
+        out.writeBytes(&tmp, sizeof(tmp));
 
         cltConnection->write(block);
         cltConnection->flush();
@@ -678,10 +677,18 @@ void MainWindow::connectionSucessToClient(void) {
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setByteOrder(QDataStream::LittleEndian);
 
-    /* /!\ Doesn't work properly using C string (out << "Hi";) /!\
-     * Answer: It might be because a C-string is then cast as a QString and
-     *         this stores each data as uint16_t instead of uint8_t */
-    out << QByteArray("Connection successful");
+    /* Prepare response */
+    /* Note: Prefere
+     *       - out.writeBytes()
+     *       over
+     *       - out << (uint8_t)(PROTOCOL_SERVER_RESPONSE::*)
+     *       - block.append(PROTOCOL_SERVER_RESPONSE::*);
+     *       Because the 1st version adds a header with the number of data
+     *       after the header, where the 2nd doesn't.
+     *       I found it safer to send the number of data to the receiver,
+     *       so he can manage length variabilty */
+    char tmp = PROTOCOL_SERVER_RESPONSE::CLIENT_CONNECTION_ACK_AND_WAITING_DATA;
+    out.writeBytes(&tmp, sizeof(tmp));
 
     if ( ! cltConnection ) {
         cltConnection = tcpServer->nextPendingConnection();
