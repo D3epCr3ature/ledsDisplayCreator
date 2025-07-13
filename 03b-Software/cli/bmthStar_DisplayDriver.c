@@ -13,6 +13,8 @@
 #include <netinet/in.h>         /* .. htons(), struct sockaddr_in */
 #include <sys/socket.h>         /* .. socket(), connect(), recv(), send() */
 
+#include "../protocol_src/protocol_routing_variables.h"
+
 /* Uncomment to enable debug prints */
 //#define ENA_DBG 1
 #if defined(ENA_DBG)
@@ -95,26 +97,19 @@ void sigint_handler(int sig) {
  *************************************************************************** */
 void *receiveServerMsg(void *arg) {
         int  socketFd = *((int *)arg);
-        char buff[15+1] = {0};
-        char *buffRecvData = buff+4;
+        char buff[5+1] = {0};
         int  streamLen;
         uint32_t dataLenLE;
-        int  *exitValue;
-
-        exitValue  = (int *) malloc(sizeof(exitValue));
-        if ( ! exitValue )      return exitValue;
-        *exitValue = 0xDEADBEEF;
+        /* Avoid dynamic allocation in threaded function,
+         * by having the return code var. as static */
+        static int exitRc = 0;
+        exitRc = 0xDEADBEEF;
 
         while (running) {
-                streamLen = recv(socketFd, (void *) buff,
+                streamLen = recv(socketFd, (void *)buff,
                                  sizeof(buff)-1, MSG_DONTWAIT);
 
-                /* 4 bytes of stream length + 7 for "Leaving" msg */
-                if (streamLen != 11)    continue;
-
                 dataLenLE = __cpu_to_le32p((uint32_t *)buff);
-                /* Security for printing it later on */
-                buffRecvData[dataLenLE] = '\0';
                 #if defined(ENA_DBG)
                 printf("CLT-DBG: dataLenLE[%d] | Msg[%s]\n",
                        dataLenLE, buffRecvData);
@@ -123,13 +118,20 @@ void *receiveServerMsg(void *arg) {
                 fflush(stdout);
                 #endif
 
-                if ( ! strcmp(buffRecvData, "Leaving") ) {
-                        *exitValue = 0;
+                /* Full stream is 4 bytes of stream length +
+                 * 1 for server's shut down routing value
+                 * So compare both value for safety and avoid case like:
+                 * - 4 random bytes before actual data */
+                if (streamLen != 5 && dataLenLE != 1)
+                        continue;
+
+                if (buff[4] == LEAVE_SHUTDOWN) {
+                        exitRc  = 0;
                         running = 0;
                 }
         }
 
-        return exitValue;
+        return (void *)&exitRc;
 }
 
 /** **************************************************************************
@@ -222,7 +224,7 @@ int main(int argc, char **argv) {
 
         printf("~~~ WELCOME TO THE PROGRAM ~~~\n");
         printf("CLT: Wait for connection validation...\n");
-        while ( ! connectionSuccessful ) {
+        while ( ! connectionSuccessful && running ) {
                 /* Use MSG_DONTWAIT as MSG_WAITALL wait for buffer
                  * to be filled with "size" elements (if no error occurs).
                  * Other flags, like MSG_TRUNC, are in evaluation
@@ -230,19 +232,18 @@ int main(int argc, char **argv) {
                 streamLenLE = recv(socketFd, (void *) buff,
                                    BUFFER_LEN, MSG_DONTWAIT);
 
-                /* 4 bytes of stream length + 21 for "Connection successful" */
-                if (streamLenLE != 25)    continue;
+                /* 4 bytes of stream length + 1 for routing value of
+                 * acknowledge value: CLIENT_CONNECTION_ACK_AND_WAITING_NEW_DATA */
+                if (streamLenLE != 5)   continue;
 
                 dataLenLE = __cpu_to_le32p((uint32_t *)buff);
-                /* Security for printing it later on */
-                buffRecvData[dataLenLE] = '\0';
                 DBG("Server's response (length: %d, actual data: %d):\n",
                     streamLenLE, dataLenLE);
 
-                printf("SVR: %s\n", buffRecvData);
-
-                if ( ! strcmp(buffRecvData, "Connection successful") )
+                if (*((uint8_t *)buffRecvData) ==
+                    CLIENT_CONNECTION_ACK_AND_WAITING_DATA) {
                         connectionSuccessful = 1;
+                }
         }
 
         printf("CLT: Launching task to detect if server kills itself...\n");
@@ -319,7 +320,6 @@ int main(int argc, char **argv) {
         }
 
         pthread_join(svrLeavingThread, (void **) &threadRc);
-
         if (threadRc && *threadRc) {
                 /* 1st 4 bytes are stream length info. in Little Endian */
                 if (send(socketFd, (void *) "\x07\0\0\0Leaving", 11, 0) != 11)
@@ -332,7 +332,6 @@ int main(int argc, char **argv) {
         }
 
         /* Resources cleaning */
-        free(threadRc);
         close(socketFd);
 
         return 0;
