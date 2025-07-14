@@ -43,7 +43,7 @@ This option allows the user to see each LED's index. Very useful when drawing a 
 
 - Using a design
 
-  ![Sample with 7Seg's design](01-Doc/pics/)
+  ![Sample with 7Seg's design](01-Doc/pics/usingDesign.gif)
 
 - Creating, Saving & Loading a design
 
