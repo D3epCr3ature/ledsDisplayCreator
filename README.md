@@ -47,7 +47,11 @@ This option allows the user to see each LED's index. Very useful when drawing a 
 
 - Creating, Saving & Loading a design
 
-  ![Sample with custom design](01-Doc/pics/)
+  ![Sample with custom design](01-Doc/pics/customDesign.gif)
+
+  **Note:** When removing LEDs ("Empty design" or Shift+Right click on LED),
+  there might be some remains of them. As seen, just moving it out of 
+  the drawing area refreshes it.
 
 ## Background
 
