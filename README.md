@@ -31,6 +31,28 @@ This tool offers to create a custom LEDs display and to communicate with it, thr
 
 - **
 
+## Features
+
+### Basic controls in the drawing area
+
+- **Right click:** Place a LED
+
+- **Shift + Right click:** Remove LED under cursor
+
+  - When 2 LEDs are overlapping under the cursor, the latest placed is removed.
+
+- **Left click:** Grab and move inside the drawing area
+
+### Shortcuts
+
+- **Ctrl+S:** Save current design
+
+- **Ctrl+O:** Open/Load an existing design
+
+- **Ctrl+Z:** Undo last action (TODO: Yet to implement)
+
+- **Ctrl+Q:** Quit application
+
 ## Showcase
 
 ### X-Ray option
